@@ -12,9 +12,9 @@ class Level:
     number: int
     complete: bool = False
 
-    def __init__(self, number, map_grid, items, monsters):
+    def __init__(self, number, items, monsters):
         self.number = number
-        self.map_grid = map_grid
+        self.map_grid = Map()
         self.items = items
         self.monsters = monsters
 

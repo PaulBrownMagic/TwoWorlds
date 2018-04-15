@@ -1,1 +1,1 @@
-from src.maps.datatypes import Location
+from src.maps.datatypes import Location, Map

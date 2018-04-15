@@ -1,0 +1,9 @@
+import tcod
+
+SCREEN_WIDTH = 80
+SCREEN_HEIGHT = 50
+TITLE = "Rogue: Beyond The Veil"
+
+FOV_ALGO = tcod.FOV_BASIC
+FOV_LIGHT_WALLS = True
+FOV_RADIUS = 16

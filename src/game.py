@@ -1,12 +1,13 @@
 from tcod.color import white
 
+from src.gui import update_screen
 from src.levels import make_level
 from src.maps import Location
 from src.objects import Player
 
 
 def play_level(level):
-    pass
+    update_screen(level)
 
 
 def play_game():
