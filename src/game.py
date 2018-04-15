@@ -8,7 +8,7 @@ from src.objects import Player
 
 
 def play_level(level):
-    game_state = handle_keys()
+    game_state = handle_keys(level)
     update_screen(level)
     return game_state
 

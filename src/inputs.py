@@ -1,14 +1,16 @@
 import tcod
 
 from src.gui import toggle_fullscreen
+from src.objects import run_move_logic
 
 
-def handle_keys():
+def handle_keys(level):
     user_input = get_user_input()
     if user_input == "FULLSCREEN":
         toggle_fullscreen()
     elif user_input == "ESCAPE":
         return "EXIT"
+    run_move_logic(level, user_input)
     return "PLAYING"
 
 

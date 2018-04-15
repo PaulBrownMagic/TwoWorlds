@@ -21,6 +21,10 @@ class Level:
         self.items = items
         self.monsters = monsters
 
+    @property
+    def all_objects(self):
+        return self.items + self.monsters
+
 
 class MagicLevel(Level):
     items: [MagicItem]

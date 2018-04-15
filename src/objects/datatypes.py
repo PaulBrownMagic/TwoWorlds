@@ -10,12 +10,14 @@ class Object:
     location: Location
     char: str
     colour: color.Color
+    blocks: bool
 
     def __init__(self, name, location, char, colour):
         self.name = name
         self.location = location
         self.char = char
         self.colour = colour
+        self.blocks = False
 
 
 class MovingObject(Object):
@@ -31,6 +33,7 @@ class MovingObject(Object):
         self.attack = attack
         self.defence = defence
         self.hp = hp
+        self.blocks = True
 
 
 class Item(Object):
