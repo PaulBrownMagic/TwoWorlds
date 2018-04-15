@@ -1,1 +1,1 @@
-from src.gui.main import update_screen
+from src.gui.main import update_screen, toggle_fullscreen

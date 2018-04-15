@@ -1,29 +1,41 @@
-from tcod.color import white
+import tcod
 
 from src.gui import update_screen
+from src.inputs import handle_keys
 from src.levels import make_level
-from src.maps import Location
+from src.maps import Location, place_in_room
 from src.objects import Player
 
 
 def play_level(level):
+    game_state = handle_keys()
     update_screen(level)
+    return game_state
 
 
 def play_game():
     player = Player(name="You",
                     location=Location(20, 20),
                     char="@",
-                    colour=white,
+                    colour=tcod.color.white,
                     state="ACTIVE",
                     attack=16,
                     defence=0,
                     hp=12,
                     )
     level_number = 1
+    level = make_level(level_number, player)
+    place_in_room(level.map_grid, player)
+    update_screen(level)
 
-    while not player.state == "DEAD":
-        level = make_level(level_number)
-        while not level.complete:
-            play_level(level)
-        level_number = level.number
+    while not tcod.console_is_window_closed():
+        game_state = play_level(level)
+        if game_state == "EXIT":
+            break
+        elif game_state == "NEXT_LEVEL":
+            level_number = level.number
+            level = make_level(level_number)
+            place_in_room(level.map_grid, player)
+        elif game_state == "PLAYER DEAD":
+            print("GAME OVER")
+            break

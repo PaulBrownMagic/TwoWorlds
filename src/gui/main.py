@@ -18,7 +18,7 @@ root = tcod.console_init_root(SCREEN_WIDTH,
 
 
 def toggle_fullscreen():
-    tcod.console.set_fullscreen(not tcod.console_is_fullscreen())
+    tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
 
 def tile_colour(mp, x, y):
@@ -47,9 +47,17 @@ def draw_map(mp):
                                  tile_colour(mp, x, y))
 
 
+def draw(item):
+    tcod.console_put_char(con, item.location.x, item.location.y, item.char)
+    tcod.console_set_char_foreground(con,
+                                     item.location.x,
+                                     item.location.y,
+                                     item.colour)
+
+
 def update_screen(level):
     draw_map(level.map_grid)
-
+    draw(level.player)
     tcod.console_blit(src=con, x=0, y=0,
                       w=SCREEN_WIDTH, h=SCREEN_HEIGHT,
                       dst=root,

@@ -172,7 +172,6 @@ class Map(TcodMap):
                     if (x, y) not in connections]
         extras = set([choice(excluded) for _ in range(randint(1, 5))])
         self.passages += [self._connect(c) for c in extras]
-        print(self.passages)
 
         for pt in chain(*[p.tiles for p in self.passages]):
             tile = self.tiles[pt.location.y][pt.location.x]
