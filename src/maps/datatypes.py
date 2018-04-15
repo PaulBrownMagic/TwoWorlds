@@ -17,7 +17,7 @@ class Tile:
     transparent: bool
     explored: bool
 
-    def __init__(self, location, walkable=False, transparent=True):
+    def __init__(self, location, walkable=False, transparent=False):
         self.location = location
         self.walkable = walkable
         self.transparent = transparent

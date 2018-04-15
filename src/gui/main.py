@@ -21,11 +21,9 @@ def toggle_fullscreen():
     tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
 
-def tile_colour(mp, x, y):
-    if tcod.map_is_walkable(mp, x, y):
-        return COLOURS["NORMAL"]["LIT"]["GROUND"]
-    else:
-        return COLOURS["NORMAL"]["LIT"]["WALL"]
+def tile_colour(mp, world, fov, x, y):
+    tile = "GROUND" if tcod.map_is_walkable(mp, x, y) else "WALL"
+    return COLOURS[world][fov][tile]
 
 
 def tile_char(mp, x, y):
@@ -36,15 +34,21 @@ def tile_char(mp, x, y):
     return c
 
 
-def draw_map(mp):
+def draw_map(mp, world):
     for tile in chain(*mp.tiles):
         x, y = tile.location
-        tcod.console_put_char_ex(con,
-                                 x,
-                                 y,
-                                 tile_char(mp, x, y),
-                                 (0, 0, 0),
-                                 tile_colour(mp, x, y))
+        if tcod.map_is_in_fov(mp, x, y):
+            fov = "LIT"
+            mp.tiles[y][x].explored = True
+        else:
+            fov = "DARK"
+        if mp.tiles[y][x].explored:
+            tcod.console_put_char_ex(con,
+                                     x,
+                                     y,
+                                     tile_char(mp, x, y),
+                                     (0, 0, 0),
+                                     tile_colour(mp, world, fov, x, y))
 
 
 def draw(item):
@@ -56,7 +60,7 @@ def draw(item):
 
 
 def update_screen(level):
-    draw_map(level.map_grid)
+    draw_map(level.map_grid, level.world)
     draw(level.player)
     tcod.console_blit(src=con, x=0, y=0,
                       w=SCREEN_WIDTH, h=SCREEN_HEIGHT,

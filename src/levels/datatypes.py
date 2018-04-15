@@ -13,6 +13,7 @@ class Level:
     monsters: [Monster]
     number: int
     complete: bool = False
+    world: str = "NORMAL"
 
     def __init__(self, number, player, items, monsters):
         self.number = number
@@ -29,3 +30,4 @@ class Level:
 class MagicLevel(Level):
     items: [MagicItem]
     monsters: [MagicMonster]
+    world: str = "MAGIC"
