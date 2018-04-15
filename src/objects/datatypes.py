@@ -13,9 +13,8 @@ class Object:
     blocks: bool
     found: bool
 
-    def __init__(self, name, location, char, colour):
+    def __init__(self, name, char, colour):
         self.name = name
-        self.location = location
         self.char = char
         self.colour = colour
         self.blocks = False
@@ -25,25 +24,27 @@ class Object:
 class Stairs(Object):
 
     def __init__(self):
-        super().__init__("Stairs", None, "%", color.darker_green)
+        super().__init__("Stairs", "%", color.darkest_green)
 
 
 class MovingObject(Object):
     state: str
     attack: int
     defence: int
+    xp: int
     hp: int
     max_hp: int
 
-    def __init__(self, name, location, char, colour,
-                 state, attack, defence, hp):
-        super().__init__(name, location, char, colour)
+    def __init__(self, name, char, colour,
+                 state, attack, defence, hp, xp):
+        super().__init__(name, char, colour)
         self.state = state
         self.attack = attack
         self.defence = defence
         self.hp = hp
         self.max_hp = hp
         self.blocks = True
+        self.xp = xp
 
 
 class Item(Object):
@@ -53,16 +54,16 @@ class Item(Object):
 class FunctioningItem(Item):
     function: FunctionType
 
-    def __init__(self, name, location, char, colour, function):
-        super().__init__(name, location, char, colour)
+    def __init__(self, name, char, colour, function):
+        super().__init__(name, char, colour)
         self.function = function
 
 
 class Armour(Item):
     defence: int
 
-    def __init__(self, name, location, char, colour, defence):
-        super().__init__(name, location, char, colour)
+    def __init__(self, name, char, colour, defence):
+        super().__init__(name, char, colour)
         self.defence = defence
 
 
@@ -70,16 +71,16 @@ class Weapon(Item):
     attack: int
     precision: int
 
-    def __init__(self, name, location, char, colour, attack, precision):
-        super().__init__(name, location, char, colour)
+    def __init__(self, name, char, colour, attack, precision):
+        super().__init__(name, char, colour)
         self.attack = attack
         self.precision = precision
 
 
 class Projectile(Weapon, FunctioningItem):
 
-    def __init__(self, name, location, char, colour, attack, precision):
-        super().__init__(name, location, char, colour, attack, precision)
+    def __init__(self, name, char, colour, attack, precision):
+        super().__init__(name, char, colour, attack, precision)
         self.function = None  # Must write
 
 

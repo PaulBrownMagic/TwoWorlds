@@ -4,7 +4,7 @@ from src.config import FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO
 from src.gui import update_screen, message
 from src.inputs import handle_keys
 from src.levels import make_level
-from src.maps import Location, place_in_room
+from src.maps import place_in_room
 from src.objects import Player
 
 
@@ -34,13 +34,13 @@ def setup_level(level_number, player):
 
 def play_game():
     player = Player(name="You",
-                    location=Location(20, 20),
                     char="@",
                     colour=tcod.color.white,
                     state="ACTIVE",
                     attack=16,
                     defence=0,
                     hp=12,
+                    xp=0,
                     )
     level_number = 1
     level = setup_level(level_number, player)

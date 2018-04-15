@@ -1,4 +1,5 @@
 from itertools import chain
+from math import sqrt
 from random import choice
 
 
@@ -22,3 +23,7 @@ def is_blocked(location, level):
     def on_tile(o):
         return same_location(location, o.location)
     return any([ob.blocks for ob in filter(on_tile, level.all_objects)])
+
+
+def distance_to(loc1, loc2):
+    return sqrt((loc1.x - loc2.x)**2 + (loc1.y - loc2.y)**2)

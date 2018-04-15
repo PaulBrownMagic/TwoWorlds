@@ -1,4 +1,5 @@
 from itertools import chain
+from functools import partial
 
 import tcod
 
@@ -52,7 +53,7 @@ def draw_map(mp, world):
                                      tile_colour(mp, world, fov, x, y))
 
 
-def draw(mp, item):
+def draw_in_map(mp, item):
     if tcod.map_is_in_fov(mp, item.location.x, item.location.y):
         item.found = True
     if not item.found:
@@ -65,9 +66,11 @@ def draw(mp, item):
 
 
 def update_screen(level):
+    draw = partial(draw_in_map, level.map_grid)
     draw_map(level.map_grid, level.world)
-    draw(level.map_grid, level.stairs)
-    draw(level.map_grid, level.player)
+    draw(level.stairs)
+    list(map(draw, level.monsters))
+    draw(level.player)
     update_panel(level)
     tcod.console_blit(src=con, x=0, y=0,
                       w=SCREEN_WIDTH, h=SCREEN_HEIGHT,

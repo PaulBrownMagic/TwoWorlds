@@ -16,7 +16,7 @@ def handle_keys(level):
           same_location(level.player.location, level.stairs.location)):
         return "NEXT_LEVEL"
     elif (user_input == "TAKE_STAIRS_UP" and
-          level.plaver.has_amulet_of_yendor and
+          level.player.has_amulet_of_yendor and
           same_location(level.player.location, level.stairs.location)):
         return "NEXT_LEVEL"
     run_move_logic(level, user_input)
