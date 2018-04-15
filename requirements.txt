@@ -1,0 +1,6 @@
+cffi==1.11.5
+decorator==4.2.1
+networkx==2.1
+numpy==1.14.2
+pycparser==2.18
+tdl==4.3.2
