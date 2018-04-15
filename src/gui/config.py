@@ -5,14 +5,14 @@ from tcod.color import Color
 ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
 FONT = os.path.join(ASSETS_DIR, "dejavu10x10_gs_tc.png")
 
-N_DARK_WALL = Color(41, 41, 10)
-N_LIT_WALL = Color(71, 71, 0)
-N_DARK_GROUND = Color(51, 51, 10)
-N_LIT_GROUND = Color(97, 97, 0)
+N_DARK_WALL = Color(26, 26, 16)
+N_LIT_WALL = Color(130, 103, 23)
+N_DARK_GROUND = Color(36, 36, 22)
+N_LIT_GROUND = Color(173, 138, 31)
 
-M_DARK_WALL = Color(41, 10, 10)
+M_DARK_WALL = Color(26, 10, 10)
 M_LIT_WALL = Color(71, 0, 0)
-M_DARK_GROUND = Color(51, 10, 10)
+M_DARK_GROUND = Color(36, 10, 10)
 M_LIT_GROUND = Color(97, 0, 0)
 
 COLOURS = {"NORMAL": {"DARK": {"WALL": N_DARK_WALL,

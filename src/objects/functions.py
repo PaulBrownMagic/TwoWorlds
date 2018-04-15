@@ -1,4 +1,4 @@
-from src.maps import Location, is_blocked, is_walkable
+from src.maps import Location, is_blocked, is_walkable, same_location
 
 movements = {"UP": (0, -1),
              "DOWN": (0, 1),

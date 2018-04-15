@@ -1,7 +1,7 @@
 import tcod
 
 from src.config import FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO
-from src.gui import update_screen
+from src.gui import update_screen, message
 from src.inputs import handle_keys
 from src.levels import make_level
 from src.maps import Location, place_in_room
@@ -20,6 +20,18 @@ def play_level(level):
     return game_state
 
 
+def setup_level(level_number, player):
+    level = make_level(level_number, player)
+    place_in_room(level.map_grid, player)
+    tcod.map_compute_fov(level.map_grid,
+                         player.location.x,
+                         player.location.y,
+                         radius=FOV_RADIUS,
+                         light_walls=FOV_LIGHT_WALLS,
+                         algo=FOV_ALGO)
+    return level
+
+
 def play_game():
     player = Player(name="You",
                     location=Location(20, 20),
@@ -31,14 +43,11 @@ def play_game():
                     hp=12,
                     )
     level_number = 1
-    level = make_level(level_number, player)
-    place_in_room(level.map_grid, player)
-    tcod.map_compute_fov(level.map_grid,
-                         player.location.x,
-                         player.location.y,
-                         radius=FOV_RADIUS,
-                         light_walls=FOV_LIGHT_WALLS,
-                         algo=FOV_ALGO)
+    level = setup_level(level_number, player)
+    message("Welcome to Rogue: Through The Veil")
+    message("Find the Amulet of Yendor and return it, but beware, \
+            the magic realm is never far away.")
+
     update_screen(level)
 
     while not tcod.console_is_window_closed():
@@ -46,9 +55,17 @@ def play_game():
         if game_state == "EXIT":
             break
         elif game_state == "NEXT_LEVEL":
-            level_number = level.number
-            level = make_level(level_number)
-            place_in_room(level.map_grid, player)
+            if level.player.has_amulet_of_yendor:
+                level_number = level.number - 1
+                if level_number == 0:
+                    game_state = "WON"
+                    print("WON")
+                    break
+            else:
+                level_number = level.number + 1
+            level = setup_level(level_number, player)
+            update_screen(level)
+            game_state = "PLAYING"
         elif game_state == "PLAYER DEAD":
             print("GAME OVER")
             break

@@ -11,6 +11,7 @@ class Object:
     char: str
     colour: color.Color
     blocks: bool
+    found: bool
 
     def __init__(self, name, location, char, colour):
         self.name = name
@@ -18,6 +19,13 @@ class Object:
         self.char = char
         self.colour = colour
         self.blocks = False
+        self.found = False
+
+
+class Stairs(Object):
+
+    def __init__(self):
+        super().__init__("Stairs", None, "%", color.darker_green)
 
 
 class MovingObject(Object):
@@ -25,6 +33,7 @@ class MovingObject(Object):
     attack: int
     defence: int
     hp: int
+    max_hp: int
 
     def __init__(self, name, location, char, colour,
                  state, attack, defence, hp):
@@ -33,6 +42,7 @@ class MovingObject(Object):
         self.attack = attack
         self.defence = defence
         self.hp = hp
+        self.max_hp = hp
         self.blocks = True
 
 
@@ -86,7 +96,12 @@ class Player(MovingObject):
     inventory: list = []
     wearing: Armour = None
     weilding: Weapon = None
+    has_amulet_of_yendor: bool = False
     # rings: [Rings] = []
+
+    @property
+    def xp_to_level_up(self):
+        return 100 + self.xp_level * 150
 
 
 class MagicMonster(Monster):
