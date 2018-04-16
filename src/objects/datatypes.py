@@ -30,6 +30,7 @@ class Stairs(Object):
 class MovingObject(Object):
     state: str
     attack: str
+    strength: int
     armour: int
     xp: int
     hp: int
@@ -45,6 +46,7 @@ class MovingObject(Object):
         self.max_hp = hp
         self.blocks = True
         self.xp = xp
+        self.strength = 0
 
 
 class Item(Object):

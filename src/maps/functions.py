@@ -20,6 +20,9 @@ def is_walkable(location, level):
 
 
 def is_blocked(location, level):
+    if same_location(location, level.player.location):
+        return True
+
     def on_tile(o):
         return same_location(location, o.location)
     return any([ob.blocks for ob in filter(on_tile, level.all_objects)])
