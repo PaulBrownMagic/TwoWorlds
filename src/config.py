@@ -1,7 +1,7 @@
 import tcod
 
 SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 52
+SCREEN_HEIGHT = 54
 TITLE = "Rogue: Beyond The Veil"
 
 FOV_ALGO = tcod.FOV_BASIC

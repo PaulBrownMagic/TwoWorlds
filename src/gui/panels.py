@@ -12,7 +12,7 @@ panel = tcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT-MAP_HEIGHT)
 
 def message(msg):
     messages.append(msg)
-    while len(messages) > 5:
+    while len(messages) > 4:
         del messages[0]
 
 
@@ -32,9 +32,9 @@ def render_hp_bar(player):
                tcod.color.red, tcod.color.darkest_red)
 
 
-def render_atk_bar(player):
+def render_str_bar(player):
     render_bar(1, 2, 20,
-               "Str", player.attack, player.max_attack,
+               "Str", player.strength, player.max_strength,
                tcod.color.blue, tcod.color.darkest_blue)
 
 
@@ -47,7 +47,7 @@ def render_messages():
 def update_panel(level):
     tcod.console_print(panel, 1, 0, "Level: {}".format(level.number))
     render_hp_bar(level.player)
-    render_atk_bar(level.player)
+    render_str_bar(level.player)
     arm = 0 if level.player.wearing is None else level.player.wearing.defence
     tcod.console_print(panel, 1, 3,
                        "XP: {}|{}   Arm: {}".format(level.player.xp_level,

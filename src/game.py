@@ -3,13 +3,14 @@ import tcod
 from src.config import FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO
 from src.gui import update_screen, message
 from src.inputs import handle_keys
-from src.levels import make_level
+from src.levels import make_level, update_level
 from src.maps import place_in_room
 from src.objects import Player
 
 
 def play_level(level):
     game_state = handle_keys(level)
+    update_level(level)
     tcod.map_compute_fov(level.map_grid,
                          level.player.location.x,
                          level.player.location.y,
@@ -33,12 +34,12 @@ def setup_level(level_number, player):
 
 
 def play_game():
-    player = Player(name="You",
+    player = Player(name="Rogue",
                     char="@",
                     colour=tcod.color.white,
                     state="ACTIVE",
-                    attack=16,
-                    defence=0,
+                    attack="1d4",
+                    armour=0,
                     hp=12,
                     xp=0,
                     )
@@ -47,7 +48,6 @@ def play_game():
     message("Welcome to Rogue: Through The Veil")
     message("Find the Amulet of Yendor and return it, but beware, \
             the magic realm is never far away.")
-
     update_screen(level)
 
     while not tcod.console_is_window_closed():

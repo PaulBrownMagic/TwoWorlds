@@ -29,18 +29,18 @@ class Stairs(Object):
 
 class MovingObject(Object):
     state: str
-    attack: int
-    defence: int
+    attack: str
+    armour: int
     xp: int
     hp: int
     max_hp: int
 
     def __init__(self, name, char, colour,
-                 state, attack, defence, hp, xp):
+                 state, attack, armour, hp, xp):
         super().__init__(name, char, colour)
         self.state = state
         self.attack = attack
-        self.defence = defence
+        self.armour = armour
         self.hp = hp
         self.max_hp = hp
         self.blocks = True
@@ -90,7 +90,8 @@ class Monster(MovingObject):
 
 
 class Player(MovingObject):
-    max_attack: int = 16
+    strength: int = 4
+    max_strength: int = 4
     xp_level: int = 1
     xp: int = 0
     carrying_weight_limit: int = 14
