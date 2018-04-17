@@ -4,7 +4,7 @@ import tcod
 
 from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
-from src.objects.datatypes import Player, Armour, Weapon, Projectile
+from src.objects.datatypes import Player, Armour, Weapon, Projectile, Scroll
 from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
 from src.objects.armour import ringmail, make_armour, armours
 
@@ -36,9 +36,13 @@ def takeoff_armour(level):
 def get_id_action(level):
     update_screen(level)
     key = tcod.console_wait_for_keypress(flush=True)
-    i = key.c - 97
-    if 0 <= i <= len(level.player.inventory):
-        return list(level.player.inventory)[i]
+    while key.vk != 66:
+        key = tcod.console_wait_for_keypress(flush=False)
+    if key.text == "*":
+        inventory_menu(level)
+        return get_id_action(level)
+    if key.text in level.player.inventory:
+        return key.text
     else:
         message("Unknown item")
 
@@ -88,6 +92,19 @@ def drop_item(level):
         message("Dropped {}".format(itm.name))
 
 
+def read_scroll(level):
+    message("Read what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        return
+    if type(itm) == Scroll:
+        level.player.inventory[i] = None
+        itm.function(level)
+    else:
+        message("Can't read {}".format(itm.name))
+
+
 def get_from_inventory(i, inventory):
     if i is None:
         message("Invalid Key")
@@ -104,6 +121,7 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "DROP_ITEM": drop_item,
            "INVENTORY": inventory_menu,
            "VIEW_CONTROLS": controls_menu,
+           "READ_SCROLL": read_scroll,
            }
 
 move_ticker = 1
@@ -225,6 +243,7 @@ def attack(x, y, level):
 
 def does_attack_hit(x, y, lvl_num):
     if type(x) == Player:
+        y.state = "TARGETING"
         if x.strength < 7:
             mod = x.strength - 7
         elif x.strength > 23:

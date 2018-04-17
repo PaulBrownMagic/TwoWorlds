@@ -3,7 +3,12 @@ from random import choice, randint
 
 from src.levels.datatypes import Level, MagicLevel
 from src.maps import place_in_room
-from src.objects import Stairs, make_monster, monsters_for_level, items_for
+from src.objects import (Stairs,
+                         make_monster,
+                         monsters_for_level,
+                         items_for,
+                         get_x_scrolls_for,
+                         )
 
 
 def make_level(level_number, player):
@@ -19,7 +24,7 @@ def make_level(level_number, player):
     monsters = [make_monster(choice(range_monsters))
                 for _ in range(randint(4, 8))]
     level.monsters = monsters
-    level.items = items_for(level)
+    level.items = items_for(level) + get_x_scrolls_for(level, randint(1, 4))
     place = partial(place_in_room, level.map_grid)
     place(stairs)
     list(map(place, level.monsters))

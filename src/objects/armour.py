@@ -4,9 +4,9 @@ from src.objects.datatypes import Armour
 
 A_COLOUR = colour.white
 
-leather = dict(name="leather", ac=8)
+leather = dict(name="leather armour", ac=8)
 ringmail = dict(name="ring mail", ac=7)
-st_leather = dict(name="studded leather", ac=7)
+st_leather = dict(name="studded leather armour", ac=7)
 scalemail = dict(name="scale mail", ac=6)
 chainmail = dict(name="chain mail", ac=5)
 splintmail = dict(name="splint mail", ac=4)

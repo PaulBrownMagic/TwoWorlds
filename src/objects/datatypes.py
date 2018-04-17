@@ -50,10 +50,16 @@ class Item(Object):
 
 class FunctioningItem(Item):
     function: FunctionType
+    realname: str  # name when identified
 
-    def __init__(self, name, char, colour, function):
+    def __init__(self, name, realname, char, colour, function):
         super().__init__(name, char, colour)
         self.function = function
+        self.realname = realname
+
+
+class Scroll(FunctioningItem):
+    pass
 
 
 class Armour(Item):
