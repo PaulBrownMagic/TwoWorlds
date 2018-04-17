@@ -4,6 +4,7 @@ from tcod import color as colour
 
 from src.objects.datatypes import Monster
 from src.objects.functions import dice_roll
+from src.objects.magicmonsters import SL, SN, A, STATES, magic_monsters
 from src.maps import distance_to
 
 M_COLOUR = colour.white
@@ -14,10 +15,9 @@ def in_room_target(monster, level):
         monster.state = "TARGETING"
 
 
-SL = "SLEEPING"
-SN = "SNOOZING"
-A = "ACTIVE"
-STATES = [SL, SN, A]
+# flags: A: armour drain, M: mean, F: flying, H: hidden, R: regen hp,
+# V: drain hp, X: drain xp, S: stationairy, L: lure player
+
 
 nd = dict(name="Dodo", levels=(1, 3), carry=0, flags="",
           xp=1, ac=2, hp="1d8", dmg="1d2", state=SL)
@@ -59,7 +59,7 @@ nw = dict(name="Warrior", levels=(19, 25), carry=0, flags="",
           xp=350, ac=6, hp="9d8", dmg="3d4", state=A)
 nr = dict(name="Rhinoceros", levels=(20, 999), carry=0, flags="",
           xp=2000, ac=3, hp="11d8", dmg="2d12", state=SN)
-nn = dict(name="Ninja", levels=(23, 999), carry=50, flags="MIR",
+nn = dict(name="Ninja", levels=(23, 999), carry=50, flags="MHR",
           xp=3000, ac=1, hp="10d8", dmg="2d8", state=SN)
 nk = dict(name="Knight", levels=(24, 999), carry=100, flags="M",
           xp=5000, ac=9, hp="15d8", dmg="3d10", state=A)
@@ -67,7 +67,7 @@ nk = dict(name="Knight", levels=(24, 999), carry=100, flags="M",
 
 normal_monsters = [na, nb, nc, nd, ne, nf, ng, nh, ni, nj, nk, nl, nm, nn, no,
                    np, nq, nr, ns, nt, nv, nw]
-magic_monsters = list()
+
 monsters = dict(NORMAL=normal_monsters,
                 MAGIC=magic_monsters)
 
@@ -80,7 +80,8 @@ def make_monster(m):
                    attack=m['dmg'],
                    armour=m['ac'],
                    hp=dice_roll(m['hp']),
-                   xp=m['xp']
+                   xp=m['xp'],
+                   flags=m['flags'],
                    )
 
 

@@ -37,7 +37,8 @@ class MovingObject(Object):
     max_hp: int
 
     def __init__(self, name, char, colour,
-                 state, attack, armour, hp, xp):
+                 state, attack, armour, hp, xp,
+                 strength=0):
         super().__init__(name, char, colour)
         self.state = state
         self.attack = attack
@@ -46,7 +47,7 @@ class MovingObject(Object):
         self.max_hp = hp
         self.blocks = True
         self.xp = xp
-        self.strength = 0
+        self.strength = strength
 
 
 class Item(Object):
@@ -87,13 +88,16 @@ class Projectile(Weapon, FunctioningItem):
 
 
 class Monster(MovingObject):
-    targeting_condition: FunctionType
-    target: Location
+    flags: str
+
+    def __init__(self, name, char, colour,
+                 state, attack, armour, hp, xp, flags):
+        super().__init__(name, char, colour, state, attack, armour, hp, xp)
+        self.flags = flags
 
 
 class Player(MovingObject):
-    strength: int = 4
-    max_strength: int = 4
+    max_strength: int
     xp_level: int = 1
     xp: int = 0
     carrying_weight_limit: int = 14
@@ -103,9 +107,14 @@ class Player(MovingObject):
     has_amulet_of_yendor: bool = False
     # rings: [Rings] = []
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_strength = self.strength
+
     @property
     def xp_to_level_up(self):
-        return 100 + self.xp_level * 150
+        return 10*self.xp_level + 2**self.xp_level
+
 
 
 class MagicMonster(Monster):

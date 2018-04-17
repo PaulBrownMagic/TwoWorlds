@@ -42,6 +42,7 @@ def play_game():
                     armour=0,
                     hp=12,
                     xp=0,
+                    strength=2
                     )
     level_number = 1
     level = setup_level(level_number, player)
