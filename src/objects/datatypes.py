@@ -96,8 +96,7 @@ class Player(MovingObject):
     max_strength: int
     xp_level: int = 1
     xp: int = 0
-    inventory_limit: int = 14
-    inventory: list = []
+    inventory: dict = {l: None for l in "abcdefghijklmnopqrstuvwxyz"}
     wearing: Armour = None
     wielding: Weapon = None
     has_amulet_of_yendor: bool = False
@@ -109,7 +108,8 @@ class Player(MovingObject):
         self.max_strength = self.strength
         self.wearing = armour
         self.wielding = weapon
-        self.inventory = [armour, weapon]
+        self.inventory['a'] = armour
+        self.inventory['b'] = weapon
 
     @property
     def xp_to_level_up(self):

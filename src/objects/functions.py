@@ -38,7 +38,7 @@ def get_id_action(level):
     key = tcod.console_wait_for_keypress(flush=True)
     i = key.c - 97
     if 0 <= i <= 26:
-        return i
+        return list(level.player.inventory)[i]
     else:
         message("Unknown item")
 
@@ -81,7 +81,7 @@ def drop_item(level):
     if itm in [level.player.wearing, level.player.wielding]:
         message("Rogue is using {}, can't drop it".format(itm.name))
     else:
-        itm = level.player.inventory.pop(level.player.inventory.index(itm))
+        level.player.inventory[i] = None
         itm.picked_up = False
         itm.location = level.player.location
         level.items.append(itm)
@@ -89,11 +89,9 @@ def drop_item(level):
 
 
 def get_from_inventory(i, inventory):
-    if i < len(inventory):
-        itm = inventory[i]
-    else:
+    itm = inventory[i]
+    if itm is None:
         message("No such item")
-        itm = None
     return itm
 
 
@@ -172,8 +170,9 @@ def autopickup(level):
 
 def pickup(player, item):
     if same_location(player.location, item.location):
-        if len(player.inventory) < player.inventory_limit:
-            player.inventory.append(item)
+        spaces = [l for l, i in player.inventory.items() if i is None]
+        if len(spaces) > 0:
+            player.inventory[spaces[0]] = item
             item.picked_up = True
             message("Rogue picked up {}".format(item.name))
         else:
