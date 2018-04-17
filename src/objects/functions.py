@@ -3,7 +3,7 @@ from random import randint, choice
 import tcod
 
 from src.maps import Location, is_blocked, is_walkable, same_location
-from src.gui import message, update_screen
+from src.gui import message, update_screen, inventory_menu, controls_menu
 from src.objects.datatypes import Player, Armour, Weapon, Projectile
 from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
 from src.objects.armour import ringmail, make_armour, armours
@@ -11,14 +11,14 @@ from src.objects.armour import ringmail, make_armour, armours
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
 
-movements = {"UP": (0, -1),
-             "DOWN": (0, 1),
-             "LEFT": (-1, 0),
-             "RIGHT": (1, 0),
-             "UR": (1, -1),
-             "UL": (-1, -1),
-             "DL": (-1, 1),
-             "DR": (1, 1),
+movements = {"MOVE_UP": (0, -1),
+             "MOVE_DOWN": (0, 1),
+             "MOVE_LEFT": (-1, 0),
+             "MOVE_RIGHT": (1, 0),
+             "MOVE_UP_RIGHT": (1, -1),
+             "MOVE_UP_LEFT": (-1, -1),
+             "MOVE_DOWN_LEFT": (-1, 1),
+             "MOVE_DOWN_RIGHT": (1, 1),
              "WAIT": (0, 0),
              }
 
@@ -37,7 +37,7 @@ def get_id_action(level):
     update_screen(level)
     key = tcod.console_wait_for_keypress(flush=True)
     i = key.c - 97
-    if 0 <= i <= 26:
+    if 0 <= i <= len(level.player.inventory):
         return list(level.player.inventory)[i]
     else:
         message("Unknown item")
@@ -89,6 +89,9 @@ def drop_item(level):
 
 
 def get_from_inventory(i, inventory):
+    if i is None:
+        message("Invalid Key")
+        return
     itm = inventory[i]
     if itm is None:
         message("No such item")
@@ -99,6 +102,8 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
            "DROP_ITEM": drop_item,
+           "INVENTORY": inventory_menu,
+           "VIEW_CONTROLS": controls_menu,
            }
 
 move_ticker = 1
@@ -264,7 +269,6 @@ def update_xp(x, y):
         # Level Up
         if x.xp >= x.xp_to_level_up:
             x.xp_level += 1
-            x.attack = "{}d4".format(x.xp_level)
             hp_up = dice_roll("3d5")
             x.hp += hp_up
             x.max_hp += hp_up

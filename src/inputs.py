@@ -1,5 +1,6 @@
 import tcod
 
+from src.config import arrows, vim
 from src.gui import toggle_fullscreen
 from src.maps import same_location
 from src.objects import run_move_logic
@@ -21,30 +22,6 @@ def handle_keys(level):
         return "NEXT_LEVEL"
     run_move_logic(level, user_input)
     return "PLAYING"
-
-
-arrows = {15: "LEFT",
-          16: "RIGHT",
-          14: "UP",
-          17: "DOWN"}
-
-vim = {"h": "LEFT",
-       "l": "RIGHT",
-       "j": "DOWN",
-       "k": "UP",
-       "y": "UL",
-       "u": "UR",
-       "b": "DL",
-       "n": "DR",
-       ".": "WAIT",
-       ">": "TAKE_STAIRS_DOWN",
-       "<": "TAKE_STAIRS_UP",
-       "T": "TAKE_OFF_ARMOUR",
-       "W": "WEAR_ARMOUR",
-       "w": "WIELD_WEAPON",
-       "d": "DROP_ITEM",
-       }
-
 
 def get_user_input():
     key = tcod.console_wait_for_keypress(flush=False)

@@ -40,7 +40,7 @@ def render_str_bar(player):
 
 def render_messages():
     tcod.console_print_rect(panel, 22, 0,
-                            SCREEN_WIDTH - 22, SCREEN_HEIGHT-MAP_HEIGHT-4,
+                            SCREEN_WIDTH - 22, SCREEN_HEIGHT-MAP_HEIGHT,
                             fmt="\n".join(messages))
 
 
