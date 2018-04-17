@@ -36,7 +36,14 @@ vim = {"h": "LEFT",
        "u": "UR",
        "b": "DL",
        "n": "DR",
-       ".": "WAIT"}
+       ".": "WAIT",
+       ">": "TAKE_STAIRS_DOWN",
+       "<": "TAKE_STAIRS_UP",
+       "T": "TAKE_OFF_ARMOUR",
+       "W": "WEAR_ARMOUR",
+       "w": "WIELD_WEAPON",
+       "d": "DROP_ITEM",
+       }
 
 
 def get_user_input():
@@ -45,10 +52,6 @@ def get_user_input():
         return arrows[key.vk]
     elif key.vk == 66 and key.text in vim:
         return vim[key.text]
-    elif key.vk == 66 and key.text == ">" and key.shift:
-        return "TAKE_STAIRS_DOWN"
-    elif key.vk == 66 and key.text == "<" and key.shift:
-        return "TAKE_STAIRS_UP"
     elif key.vk == 1:
         return "ESCAPE"
     elif key.vk == 4 and (key.lalt or key.ralt):

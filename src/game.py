@@ -5,7 +5,7 @@ from src.gui import update_screen, message
 from src.inputs import handle_keys
 from src.levels import make_level, update_level
 from src.maps import place_in_room
-from src.objects import Player
+from src.objects import make_player
 
 
 def play_level(level):
@@ -34,16 +34,7 @@ def setup_level(level_number, player):
 
 
 def play_game():
-    player = Player(name="Rogue",
-                    char="@",
-                    colour=tcod.color.white,
-                    state="ACTIVE",
-                    attack="1d4",
-                    armour=10,
-                    hp=12,
-                    xp=0,
-                    strength=16
-                    )
+    player = make_player()
     level_number = 1
     level = setup_level(level_number, player)
     message("Welcome to Rogue: Through The Veil")

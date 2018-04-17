@@ -1,6 +1,6 @@
 from types import FunctionType
 
-from tcod import color
+from tcod import color as colour
 
 from src.maps.datatypes import Location
 
@@ -9,7 +9,7 @@ class Object:
     name: str
     location: Location
     char: str
-    colour: color.Color
+    colour: colour.Color
     blocks: bool
     found: bool
 
@@ -24,34 +24,28 @@ class Object:
 class Stairs(Object):
 
     def __init__(self):
-        super().__init__("Stairs", "%", color.darkest_green)
+        super().__init__("Stairs", "%", colour.darkest_green)
 
 
 class MovingObject(Object):
     state: str
-    attack: str
-    strength: int
-    armour: int
     xp: int
     hp: int
     max_hp: int
 
     def __init__(self, name, char, colour,
-                 state, attack, armour, hp, xp,
-                 strength=0):
+                 state, hp, xp):
         super().__init__(name, char, colour)
         self.state = state
-        self.attack = attack
-        self.armour = armour
         self.hp = hp
         self.max_hp = hp
         self.blocks = True
         self.xp = xp
-        self.strength = strength
 
 
 class Item(Object):
     weight: int = 1
+    picked_up = False
 
 
 class FunctioningItem(Item):
@@ -72,27 +66,29 @@ class Armour(Item):
 
 class Weapon(Item):
     attack: int
-    precision: int
 
-    def __init__(self, name, char, colour, attack, precision):
+    def __init__(self, name, char, colour, attack):
         super().__init__(name, char, colour)
         self.attack = attack
-        self.precision = precision
 
 
-class Projectile(Weapon, FunctioningItem):
+class Projectile(Weapon):
 
-    def __init__(self, name, char, colour, attack, precision):
-        super().__init__(name, char, colour, attack, precision)
-        self.function = None  # Must write
+    def __init__(self, name, char, colour, attack, thrown):
+        super().__init__(name, char, colour, attack)
+        self.thrown = thrown  # attack when thrown
 
 
 class Monster(MovingObject):
+    attack: str
+    armour: int
     flags: str
 
     def __init__(self, name, char, colour,
                  state, attack, armour, hp, xp, flags):
-        super().__init__(name, char, colour, state, attack, armour, hp, xp)
+        super().__init__(name, char, colour, state, hp, xp)
+        self.attack = attack
+        self.armour = armour
         self.flags = flags
 
 
@@ -100,21 +96,32 @@ class Player(MovingObject):
     max_strength: int
     xp_level: int = 1
     xp: int = 0
-    carrying_weight_limit: int = 14
+    inventory_limit: int = 14
     inventory: list = []
     wearing: Armour = None
-    weilding: Weapon = None
+    wielding: Weapon = None
     has_amulet_of_yendor: bool = False
     # rings: [Rings] = []
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, armour, weapon):
+        super().__init__("Rogue", "@", colour.white, "ACTIVE", 12, 0)
+        self.strength = 16
         self.max_strength = self.strength
+        self.wearing = armour
+        self.wielding = weapon
+        self.inventory = [armour, weapon]
 
     @property
     def xp_to_level_up(self):
-        return 10*self.xp_level + 2**self.xp_level
+        return 10*2**self.xp_level
 
+    @property
+    def attack(self):
+        return self.wielding.attack if self.wielding is not None else "1d2"
+
+    @property
+    def armour(self):
+        return self.wearing.defence if self.wearing is not None else 11
 
 
 class MagicMonster(Monster):

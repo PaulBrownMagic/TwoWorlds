@@ -48,7 +48,7 @@ def update_panel(level):
     tcod.console_print(panel, 1, 0, "Level: {}".format(level.number))
     render_hp_bar(level.player)
     render_str_bar(level.player)
-    arm = 0 if level.player.wearing is None else level.player.wearing.defence
+    arm = 11 - level.player.armour
     tcod.console_print(panel, 1, 3,
                        "XP: {}|{}   Arm: {}".format(level.player.xp_level,
                                                     level.player.xp,

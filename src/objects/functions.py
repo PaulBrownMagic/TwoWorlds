@@ -2,9 +2,11 @@ from random import randint, choice
 
 import tcod
 
-from src.maps import Location, is_blocked, is_walkable  # , same_location
-from src.gui import message
-from src.objects.datatypes import Player
+from src.maps import Location, is_blocked, is_walkable, same_location
+from src.gui import message, update_screen
+from src.objects.datatypes import Player, Armour, Weapon, Projectile
+from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
+from src.objects.armour import ringmail, make_armour, armours
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
@@ -20,7 +22,89 @@ movements = {"UP": (0, -1),
              "WAIT": (0, 0),
              }
 
+
+def takeoff_armour(level):
+    if level.player.wearing is not None:
+        dfnc = level.player.wearing.defence
+        message("Rogue removes {} [{}]".format(level.player.wearing.name,
+                                               11-dfnc))
+        level.player.wearing = None
+    else:
+        message("Rogue is already not wearing armour")
+
+
+def get_id_action(level):
+    update_screen(level)
+    key = tcod.console_wait_for_keypress(flush=True)
+    i = key.c - 97
+    if 0 <= i <= 26:
+        return i
+    else:
+        message("Unknown item")
+
+
+def wear_armour(level):
+    if level.player.wearing is not None:
+        message("Rogue is already wearing armour")
+    else:
+        message("Wear what?")
+        i = get_id_action(level)
+        itm = get_from_inventory(i, level.player.inventory)
+        if itm is None:
+            return
+        elif type(itm) == Armour:
+            level.player.wearing = itm
+            message("Rogue puts on {} [{}]".format(itm.name, 11-itm.defence))
+        else:
+            message("Can't wear {} as armour".format(itm.name))
+
+
+def wield_weapon(level):
+    message("Wield what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        return
+    elif type(itm) in [Weapon, Projectile]:
+        level.player.wielding = itm
+        message("Rogue wields {}".format(itm.name))
+    else:
+        message("Can't wield {} as weapon".format(itm.name))
+
+
+def drop_item(level):
+    message("Drop what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        return
+    if itm in [level.player.wearing, level.player.wielding]:
+        message("Rogue is using {}, can't drop it".format(itm.name))
+    else:
+        itm = level.player.inventory.pop(level.player.inventory.index(itm))
+        itm.picked_up = False
+        itm.location = level.player.location
+        level.items.append(itm)
+        message("Dropped {}".format(itm.name))
+
+
+def get_from_inventory(i, inventory):
+    if i < len(inventory):
+        itm = inventory[i]
+    else:
+        message("No such item")
+        itm = None
+    return itm
+
+
+actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
+           "WEAR_ARMOUR": wear_armour,
+           "WIELD_WEAPON": wield_weapon,
+           "DROP_ITEM": drop_item,
+           }
+
 move_ticker = 1
+
 
 def tick_move(level):
     global move_ticker
@@ -45,6 +129,7 @@ def regen_health(mo, i):
         x = randint(1, i-7)
     mo.hp = mo.hp + x if mo.hp < mo.max_hp - x else mo.max_hp
 
+
 def run_move_logic(level, user_input):
     if user_input in movements:
         tick_move(level)
@@ -52,6 +137,10 @@ def run_move_logic(level, user_input):
         _move(level.player, x, y, level)
         for monster in level.monsters:
             monster_move(level, monster)
+        find_stairs(level)
+        autopickup(level)
+    elif user_input in actions:
+        actions[user_input](level)
 
 
 def _move(obj, x, y, level, stationary=False):
@@ -65,6 +154,30 @@ def _move(obj, x, y, level, stationary=False):
                           level.monsters + [level.player])
         for monster in monsters:
             attack(obj, monster, level)
+
+
+def find_stairs(level):
+    in_fov = tcod.map_is_in_fov(level.map_grid, level.stairs.location.x,
+                                level.stairs.location.y)
+    if in_fov:
+        level.stairs.found = True
+
+
+def autopickup(level):
+    itms = [item for item in level.items
+            if same_location(level.player.location, item.location)]
+    for itm in itms:
+        pickup(level.player, itm)
+
+
+def pickup(player, item):
+    if same_location(player.location, item.location):
+        if len(player.inventory) < player.inventory_limit:
+            player.inventory.append(item)
+            item.picked_up = True
+            message("Rogue picked up {}".format(item.name))
+        else:
+            message("Rogue's inventory is full")
 
 
 def is_flying_targeting(monster):
@@ -126,6 +239,7 @@ def does_attack_hit(x, y, lvl_num):
 
 
 def damage_done_by(x):
+    mod = 0
     if type(x) == Player:
         if x.strength == 16:
             mod = 1
@@ -137,10 +251,6 @@ def damage_done_by(x):
             mod = 4
         elif x.strength > 21:
             mod = 5
-        else:
-            mod = 0
-    else:
-        mod = x.strength
     return dice_roll(x.attack) + mod
 
 
@@ -151,14 +261,15 @@ def dice_roll(dice):
 
 def update_xp(x, y):
     if type(x) == Player:
-       x.xp += y.xp
-       # Level Up
-       if x.xp >= x.xp_to_level_up:
+        x.xp += y.xp
+        # Level Up
+        if x.xp >= x.xp_to_level_up:
             x.xp_level += 1
             x.attack = "{}d4".format(x.xp_level)
             hp_up = dice_roll("3d5")
             x.hp += hp_up
             x.max_hp += hp_up
+            message("Welcome to level {}".format(x.xp_level))
 
 
 def update_monster_state(level, monster):
@@ -172,3 +283,15 @@ def update_monster_state(level, monster):
         monster.state = "TARGETING"
     elif in_fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
         monster.state = "TARGETING"
+
+
+def make_player():
+    return Player(weapon=make_weapon(mace),
+                  armour=make_armour(ringmail)
+                  )
+
+
+def items_for(level):
+    wpns = [make_weapon(choice(weapons)) for _ in range(randint(0, 3))]
+    armrs = [make_armour(choice(armours)) for _ in range(randint(0, 3))]
+    return wpns + armrs
