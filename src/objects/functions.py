@@ -20,9 +20,23 @@ movements = {"UP": (0, -1),
              "WAIT": (0, 0),
              }
 
+move_ticker = 1
+
+def tick_move(level):
+    global move_ticker
+    move_ticker += 1
+    if move_ticker % 20 == 0:
+        for mon in filter(lambda m: "R" in m.flags, level.monsters):
+            regen_health(mon)
+        regen_health(level.player)
+
+
+def regen_health(mo):
+    mo.hp = mo.hp + 2 if mo.hp < mo.max_hp - 2 else mo.max_hp
 
 def run_move_logic(level, user_input):
     if user_input in movements:
+        tick_move(level)
         x, y = movements[user_input]
         _move(level.player, x, y, level)
         for monster in level.monsters:
@@ -97,9 +111,13 @@ def dice_roll(dice):
 def update_xp(x, y):
     if type(x) == Player:
        x.xp += y.xp
+       # Level Up
        if x.xp >= x.xp_to_level_up:
             x.xp_level += 1
             x.attack = "{}d4".format(x.xp_level)
+            hp_up = dice_roll("3d5")
+            x.hp += hp_up
+            x.max_hp += hp_up
 
 
 def update_monster_state(level, monster):
