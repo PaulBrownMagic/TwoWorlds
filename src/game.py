@@ -39,10 +39,10 @@ def play_game():
                     colour=tcod.color.white,
                     state="ACTIVE",
                     attack="1d4",
-                    armour=0,
+                    armour=10,
                     hp=12,
                     xp=0,
-                    strength=2
+                    strength=16
                     )
     level_number = 1
     level = setup_level(level_number, player)

@@ -27,12 +27,23 @@ def tick_move(level):
     move_ticker += 1
     if move_ticker % 20 == 0:
         for mon in filter(lambda m: "R" in m.flags, level.monsters):
-            regen_health(mon)
-        regen_health(level.player)
+            regen_health(mon, level.number)
+        regen_health(level.player, level.number)
 
 
-def regen_health(mo):
-    mo.hp = mo.hp + 2 if mo.hp < mo.max_hp - 2 else mo.max_hp
+def do_hp_regen(level, mt):
+    if level.number < 8:
+        return mt % 21 - level.number * 2 == 0
+    else:
+        return mt % 3 == 0
+
+
+def regen_health(mo, i):
+    if i < 8:
+        x = 1
+    else:
+        x = randint(1, i-7)
+    mo.hp = mo.hp + x if mo.hp < mo.max_hp - x else mo.max_hp
 
 def run_move_logic(level, user_input):
     if user_input in movements:
@@ -53,7 +64,7 @@ def _move(obj, x, y, level, stationary=False):
         monsters = filter(lambda x: x.location == new_location and x.blocks,
                           level.monsters + [level.player])
         for monster in monsters:
-            attack(obj, monster)
+            attack(obj, monster, level)
 
 
 def is_flying_targeting(monster):
@@ -78,11 +89,11 @@ def monster_move(level, monster):
         _move(monster, x, y, level, stationary)
 
 
-def attack(x, y):
+def attack(x, y, level):
     if type(x) == type(y):
         return
     msg = "{} attacks {}".format(x.name, y.name)
-    if does_attack_hit(y):
+    if does_attack_hit(x, y, level.number):
         y.hp -= damage_done_by(x)
         if y.hp <= 0:
             y.state = "DEAD"
@@ -95,12 +106,42 @@ def attack(x, y):
     message(msg)
 
 
-def does_attack_hit(x):
-    return randint(1, 20) > x.armour
+def does_attack_hit(x, y, lvl_num):
+    if type(x) == Player:
+        if x.strength < 7:
+            mod = x.strength - 7
+        elif x.strength > 23:
+            mod = 3
+        else:
+            mod = (x.strength - 15)//2
+        level = x.xp_level
+        if "F" in y.flags:
+            mod -= 3
+    else:
+        level = lvl_num
+        mod = 0
+        if "F" in x.flags:
+            mod -= 3
+    return randint(1, 20) + mod >= 20 - level - y.armour
 
 
 def damage_done_by(x):
-    return dice_roll(x.attack) + x.strength
+    if type(x) == Player:
+        if x.strength == 16:
+            mod = 1
+        elif x.strength == 17:
+            mod = 2
+        elif x.strength in [18, 19]:
+            mod = 3
+        elif x.strength in [20, 21]:
+            mod = 4
+        elif x.strength > 21:
+            mod = 5
+        else:
+            mod = 0
+    else:
+        mod = x.strength
+    return dice_roll(x.attack) + mod
 
 
 def dice_roll(dice):
