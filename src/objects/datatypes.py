@@ -13,7 +13,7 @@ class Name:
 
     def __init__(self, name, obj_type):
         randname = " ".join([name_generator.new()
-                              for _ in range(randint(1, 3))])
+                             for _ in range(randint(1, 3))])
         self.name = "a {} titled {}".format(obj_type, randname)
         self.realname = "a {} of {}".format(obj_type, name)
 
@@ -140,7 +140,7 @@ class Player(MovingObject):
     inventory_limit = 26
     # rings: [Rings] = []
 
-    def __init__(self, armour, weapon):
+    def __init__(self, armour, weapon, items):
         super().__init__("Rogue", "@", colour.white, "ACTIVE", 12, 0)
         self.strength = 16
         self.max_strength = self.strength
@@ -148,6 +148,8 @@ class Player(MovingObject):
         self.wielding = weapon
         self.inventory['a'] = InventoryItem(armour)
         self.inventory['b'] = InventoryItem(weapon)
+        for l, i in zip("cdefghijklmnopqrstuvwxyz", items):
+            self.inventory[l] = InventoryItem(i)
 
     @property
     def xp_to_level_up(self):

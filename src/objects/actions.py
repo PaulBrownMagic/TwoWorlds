@@ -182,7 +182,7 @@ def throw_item(level):
             make_attack(level.player, target,
                         thrown_damage_done_by(itm, level.player))
         else:
-            message("{} attacks {} and misses".format(x.name, y.name))
+            message("Rogue attacks {} and misses".format(target.name))
 
 
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,

@@ -72,12 +72,14 @@ def damage_done_by(x):
     return dice_roll(x.attack) + mod_attack(x)
 
 
-def thrown_damage_done_by(itm, x):
+def thrown_damage_done_by(itm, player):
     if hasattr(itm, "thrown"):
         dmg = dice_roll(itm.thrown)
+        if player.wielding.name == "Short Bow" and itm.name == "Arrow":
+            dmg += 2
     else:
         dmg = randint(1, 3)
-    return dmg + mod_attack(x)
+    return dmg + mod_attack(player)
 
 
 def dice_roll(dice):

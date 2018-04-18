@@ -8,7 +8,7 @@ from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
                                    Projectile, Scroll, InventoryItem)
-from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
+from src.objects.weapons import mace, make_weapon, shortbow, arrow
 from src.objects.armour import ringmail, make_armour, armours
 from src.objects.actions import actions
 from src.objects.combat import attack
@@ -120,7 +120,9 @@ def pickup(player, item):
         for e in existing:
             if not player.inventory[e].full:
                 player.inventory[e].count += 1
-                return  # Don't return! Need to pick up.
+                item.picked_up = True
+                message("Rogue picked up {} ({})".format(item.name, e))
+                return
         spaces = [l for l, i in player.inventory.items() if i is None]
         overburdened = sum([i.weight for i in player.inventory.values()
                             if i is not None]) >= player.inventory_limit
@@ -180,6 +182,12 @@ def update_monster_state(level, monster):
 
 
 def make_player():
-    return Player(weapon=make_weapon(mace),
-                  armour=make_armour(ringmail)
-                  )
+    player = Player(weapon=make_weapon(mace),
+                    armour=make_armour(ringmail),
+                    items=[make_weapon(shortbow), make_weapon(arrow)]
+                    )
+    for itm in player.inventory.values():
+        if itm.item.name == "Arrow":
+            itm.count = 30
+            break
+    return player

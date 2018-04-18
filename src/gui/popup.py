@@ -10,9 +10,11 @@ def menu(header, options, width):
         raise ValueError("Can't have more than 26 options in popup menu")
     height = len(header.splitlines()) + len(options) + 3
     popup = tcod.console_new(width, height)
-    fmt = "\n".join([header+"\n"] +
+    tcod.console_set_default_background(popup, (0, 0, 20))
+    tcod.console_clear(popup)
+    fmt = "\n".join([header.center(width)+"\n"] +
                     options +
-                    ["\n---press space to continue---"])
+                    ["\n" + "--- press space to continue ---".center(width)])
     tcod.console_print_rect(popup, 0, 0, width, height, fmt=fmt)
     tcod.console_blit(src=popup, x=0, y=0,
                       w=width, h=height,
@@ -29,25 +31,34 @@ def menu(header, options, width):
 
 def info_inv(level, item):
     if item == level.player.wearing:
-        return "(wearing)"
+        return "being worn"
     elif item == level.player.wielding:
-        return "(wielding)"
+        return "in hand"
     else:
         return ""
 
 
-def cap(name):
+def cap(name, count):
     name = str(name)
+    if count > 1:
+        name += "s"
     return name[0].upper() + name[1:]
+
+
+def count(count):
+    return "{} ".format(count) if count > 1 else ""
 
 
 def inventory_menu(level):
     inv = level.player.inventory
     header = "Inventory"
-    option = "{}) {} {}".format
-    options = [option(l, cap(i.item.name), info_inv(level, i.item))
+    option = "{}) {}{} {}".format
+    options = [option(l,
+                      count(i.count),
+                      cap(i.item.name, i.count),
+                      info_inv(level, i.item))
                for l, i in inv.items() if i is not None]
-    menu(header, options, 40)
+    menu(header, options, 42)
 
 
 def controls_menu(_):

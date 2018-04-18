@@ -72,6 +72,7 @@ def read_scare_monster(level):
 def teleport(level):
     """Teleport player"""
     place_in_room(level, level.player)
+    message("You have been transported")
 
 
 def enchant_weapon(level):
