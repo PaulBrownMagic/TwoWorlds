@@ -11,10 +11,11 @@ from src.objects import (Stairs,
                          )
 
 
-def make_level(level_number, player):
+def make_level(world, level_number, player):
     stairs = Stairs()
 
-    level = Level(level_number,
+    level = Level(world,
+                  level_number,
                   player,
                   stairs,
                   [],

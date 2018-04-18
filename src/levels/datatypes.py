@@ -15,9 +15,10 @@ class Level:
     monsters: [Monster]
     number: int
     complete: bool = False
-    world: str = "NORMAL"
+    world: str
 
-    def __init__(self, number, player, stairs, items, monsters):
+    def __init__(self, world, number, player, stairs, items, monsters):
+        self.world = world
         self.number = number
         self.player = player
         self.stairs = stairs

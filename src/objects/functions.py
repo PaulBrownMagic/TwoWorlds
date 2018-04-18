@@ -2,129 +2,35 @@ from random import randint, choice
 
 import tcod
 
+from src.config import movements
+# from src.inputs import movements, get_id_action
 from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
 from src.objects.datatypes import Player, Armour, Weapon, Projectile, Scroll
 from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
 from src.objects.armour import ringmail, make_armour, armours
+from src.objects.actions import actions
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
 
-movements = {"MOVE_UP": (0, -1),
-             "MOVE_DOWN": (0, 1),
-             "MOVE_LEFT": (-1, 0),
-             "MOVE_RIGHT": (1, 0),
-             "MOVE_UP_RIGHT": (1, -1),
-             "MOVE_UP_LEFT": (-1, -1),
-             "MOVE_DOWN_LEFT": (-1, 1),
-             "MOVE_DOWN_RIGHT": (1, 1),
-             "WAIT": (0, 0),
-             }
-
-
-def takeoff_armour(level):
-    if level.player.wearing is not None:
-        dfnc = level.player.wearing.defence
-        message("Rogue removes {} [{}]".format(level.player.wearing.name,
-                                               11-dfnc))
-        level.player.wearing = None
-    else:
-        message("Rogue is already not wearing armour")
-
-
-def get_id_action(level):
-    update_screen(level)
-    key = tcod.console_wait_for_keypress(flush=True)
-    while key.vk != 66:
-        key = tcod.console_wait_for_keypress(flush=False)
-    if key.text == "*":
-        inventory_menu(level)
-        return get_id_action(level)
-    if key.text in level.player.inventory:
-        return key.text
-    else:
-        message("Unknown item")
-
-
-def wear_armour(level):
-    if level.player.wearing is not None:
-        message("Rogue is already wearing armour")
-    else:
-        message("Wear what?")
-        i = get_id_action(level)
-        itm = get_from_inventory(i, level.player.inventory)
-        if itm is None:
-            return
-        elif type(itm) == Armour:
-            level.player.wearing = itm
-            message("Rogue puts on {} [{}]".format(itm.name, 11-itm.defence))
-        else:
-            message("Can't wear {} as armour".format(itm.name))
-
-
-def wield_weapon(level):
-    message("Wield what?")
-    i = get_id_action(level)
-    itm = get_from_inventory(i, level.player.inventory)
-    if itm is None:
-        return
-    elif type(itm) in [Weapon, Projectile]:
-        level.player.wielding = itm
-        message("Rogue wields {}".format(itm.name))
-    else:
-        message("Can't wield {} as weapon".format(itm.name))
-
-
-def drop_item(level):
-    message("Drop what?")
-    i = get_id_action(level)
-    itm = get_from_inventory(i, level.player.inventory)
-    if itm is None:
-        return
-    if itm in [level.player.wearing, level.player.wielding]:
-        message("Rogue is using {}, can't drop it".format(itm.name))
-    else:
-        level.player.inventory[i] = None
-        itm.picked_up = False
-        itm.location = level.player.location
-        level.items.append(itm)
-        message("Dropped {}".format(itm.name))
-
-
-def read_scroll(level):
-    message("Read what?")
-    i = get_id_action(level)
-    itm = get_from_inventory(i, level.player.inventory)
-    if itm is None:
-        return
-    if type(itm) == Scroll:
-        level.player.inventory[i] = None
-        itm.function(level)
-    else:
-        message("Can't read {}".format(itm.name))
-
-
-def get_from_inventory(i, inventory):
-    if i is None:
-        message("Invalid Key")
-        return
-    itm = inventory[i]
-    if itm is None:
-        message("No such item")
-    return itm
-
-
-actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
-           "WEAR_ARMOUR": wear_armour,
-           "WIELD_WEAPON": wield_weapon,
-           "DROP_ITEM": drop_item,
-           "INVENTORY": inventory_menu,
-           "VIEW_CONTROLS": controls_menu,
-           "READ_SCROLL": read_scroll,
-           }
-
 move_ticker = 1
+
+
+def run_move_logic(level, user_input):
+    game_state = None
+    if user_input in movements:
+        tick_move(level)
+        x, y = movements[user_input]
+        _move(level.player, x, y, level)
+        for monster in level.monsters:
+            monster_move(level, monster)
+        find_stairs(level)
+        autopickup(level)
+    elif user_input in actions:
+        game_state = actions[user_input](level)
+        print(game_state)
+    return game_state if game_state is not None else "PLAYING"
 
 
 def tick_move(level):
@@ -151,20 +57,35 @@ def regen_health(mo, i):
     mo.hp = mo.hp + x if mo.hp < mo.max_hp - x else mo.max_hp
 
 
-def run_move_logic(level, user_input):
-    if user_input in movements:
-        tick_move(level)
-        x, y = movements[user_input]
-        _move(level.player, x, y, level)
-        for monster in level.monsters:
-            monster_move(level, monster)
-        find_stairs(level)
-        autopickup(level)
-    elif user_input in actions:
-        actions[user_input](level)
+def player_sleeping(level):
+    player = level.player
+    sleeping = False
+    if player.state == "SLEEP":
+        player.state = "ACTIVE"
+        message("Rogue awakens")
+    elif player.state.startswith("SLEEP"):
+        message("Rogue sleeps")
+        player.state = player.state[:-1]
+        sleeping = True
+    return sleeping
+
+
+def is_confused(obj):
+    confused = False
+    if obj.state == "CONFUSED":
+        obj.state = "ACTIVE"
+        message("{} is no longer confused".format(obj.name.capitalize()))
+    elif obj.state.startswith("CONFUSED"):
+        obj.state = obj.state[:-1]
+        confused = True
+    return confused
 
 
 def _move(obj, x, y, level, stationary=False):
+    if type(obj) == Player and player_sleeping(level):
+        return
+    if is_confused(obj):
+        x, y = movements[choice(list(movements))]
     new_location = Location(obj.location.x + x, obj.location.y + y)
     blocked = is_blocked(new_location, level)
     walkable = is_walkable(new_location, level)
@@ -211,7 +132,9 @@ def is_flying_targeting(monster):
 def monster_move(level, monster):
     update_monster_state(level, monster)
     stationary = "S" in monster.flags
-    if monster.state == "ACTIVE" or is_flying_targeting(monster):
+    is_active = monster.state == "ACTIVE"
+    is_confused = monster.state.startswith("CONFUSED")
+    if is_active or is_confused or is_flying_targeting(monster):
         x, y = movements[choice(list(movements))]
         _move(monster, x, y, level, stationary)
     elif monster.state == "TARGETING":
@@ -243,7 +166,12 @@ def attack(x, y, level):
 
 def does_attack_hit(x, y, lvl_num):
     if type(x) == Player:
-        y.state = "TARGETING"
+        if x.state == "CONFUSE_NEXT_MONSTER":
+            y.state = "CONFUSED1234567890"
+            x.state = "ACTIVE"
+            message("{} looks confused".format(y.name.capitalize()))
+        elif not y.state.startswith("CONFUSED"):
+            y.state = "TARGETING"
         if x.strength < 7:
             mod = x.strength - 7
         elif x.strength > 23:

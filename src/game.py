@@ -21,8 +21,8 @@ def play_level(level):
     return game_state
 
 
-def setup_level(level_number, player):
-    level = make_level(level_number, player)
+def setup_level(world, level_number, player):
+    level = make_level(world, level_number, player)
     place_in_room(level.map_grid, player)
     tcod.map_compute_fov(level.map_grid,
                          player.location.x,
@@ -36,7 +36,7 @@ def setup_level(level_number, player):
 def play_game():
     player = make_player()
     level_number = 1
-    level = setup_level(level_number, player)
+    level = setup_level("NORMAL", level_number, player)
     message("Welcome to Rogue: Through The Veil")
     message("Find the Amulet of Yendor and return it, but beware, \
             the magic realm is never far away.")
@@ -55,7 +55,12 @@ def play_game():
                     break
             else:
                 level_number = level.number + 1
-            level = setup_level(level_number, player)
+            level = setup_level("NORMAL", level_number, player)
+            update_screen(level)
+            game_state = "PLAYING"
+        elif game_state == "TOGGLE_WORLDS":
+            world = "MAGIC" if level.world == "NORMAL" else "NORMAL"
+            level = setup_level(world, level_number, player)
             update_screen(level)
             game_state = "PLAYING"
         elif game_state == "PLAYER DEAD":

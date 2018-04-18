@@ -20,8 +20,8 @@ def handle_keys(level):
           level.player.has_amulet_of_yendor and
           same_location(level.player.location, level.stairs.location)):
         return "NEXT_LEVEL"
-    run_move_logic(level, user_input)
-    return "PLAYING"
+    return run_move_logic(level, user_input)
+
 
 def get_user_input():
     key = tcod.console_wait_for_keypress(flush=False)

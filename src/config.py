@@ -32,3 +32,14 @@ vim = {"h": "MOVE_LEFT",
        "i": "INVENTORY",
        "?": "VIEW_CONTROLS",
        }
+
+movements = {"MOVE_UP": (0, -1),
+             "MOVE_DOWN": (0, 1),
+             "MOVE_LEFT": (-1, 0),
+             "MOVE_RIGHT": (1, 0),
+             "MOVE_UP_RIGHT": (1, -1),
+             "MOVE_UP_LEFT": (-1, -1),
+             "MOVE_DOWN_LEFT": (-1, 1),
+             "MOVE_DOWN_RIGHT": (1, 1),
+             "WAIT": (0, 0),
+             }

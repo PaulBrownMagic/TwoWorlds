@@ -4,20 +4,20 @@ from random import choice, randint
 
 from tcod import color as colour
 
+from src.config import movements
 from src.gui import message
 from src.maps import distance_to, place_in_room
+from src.objects.actions import get_id_action, get_from_inventory
 from src.objects.datatypes import Scroll
-from src.objects.functions import (get_id_action,
-                                   get_from_inventory,
-                                   movements,
-                                   _move)
+from src.objects.functions import _move
 from src.objects.monsters import monsters_for_level, make_monster
 
 S_COLOUR = colour.white
 
 
 def confuse_next_monster(level):
-    pass
+    message("Rogue's hands glow red for a moment")
+    level.player.state = "CONFUSE_NEXT_MONSTER"
 
 
 def view_whole_map(level):
@@ -38,13 +38,14 @@ def hold_monster(level):
 
 def sleep(level):
     """Reader sleeps"""
-    pass
+    message("Rogue feels drowzy")
+    level.player.state = "SLEEP123"
 
 
 def enchant_armour(level):
     if level.player.wearing is not None:
         message("Rogue's armour glows blue for a moment")
-        level.player.wearing.armour -= 1
+        level.player.wearing.defence -= 1
     else:
         message("Nothing happens")
 
@@ -113,22 +114,27 @@ def protect_armour(level):
     level.player.wearing.protected = True
 
 
+def transition_worlds(level):
+    message("Everything turns dark, you awaken in a new world")
+    return "TOGGLE_WORLDS"
+
 N = "NORMAL"
 M = "MAGIC"
 
 scrolls = [dict(name='Mapping', world=N, p=4, f=view_whole_map),
-           # dict(name='Confuse Monster', world=N, p=7, f=confuse_next_monster),
+           dict(name='Confuse Monster', world=N, p=7, f=confuse_next_monster),
            dict(name='Hold Monster', world=M, p=2, f=hold_monster),
-           # dict(name='Sleep', world=M, p=3, f=sleep),
+           dict(name='Sleep', world=M, p=3, f=sleep),
            dict(name="Enchant Armour", world=M, p=7, f=enchant_armour),
-           dict(name="Identity", world=N, p=20, f=identify),
+           dict(name="Identity", world=N, p=7, f=identify),
            dict(name="Scare Monster", world=M, p=3, f=read_scare_monster),
            dict(name="Teleportation", world=M, p=5, f=teleport),
            dict(name="Enchant Weapon", world=M, p=8, f=enchant_weapon),
            dict(name="Create Monster", world=M, p=4, f=create_monster),
            # dict(name="Remove Curse", world=M, p=7, f=remove_curse),
            dict(name="Aggravate Monsters", world=N, p=3, f=aggravate_monsters),
-           dict(name="Protect Armour", world=M, p=2, f=protect_armour)
+           dict(name="Protect Armour", world=M, p=2, f=protect_armour),
+           dict(name="Through The Veil", world=N, p=6, f=transition_worlds),
            ]
 
 
