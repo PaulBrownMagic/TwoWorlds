@@ -40,5 +40,5 @@ def make_weapon(w):
 
 
 def get_x_weapons(num):
-    weights = [w['p'] for w in weapons]  # all_weapons
-    return list(map(make_weapon, choices(weapons, weights, k=num)))
+    weights = [w['p'] for w in all_weapons]
+    return list(map(make_weapon, choices(all_weapons, weights, k=num)))

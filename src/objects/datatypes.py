@@ -113,6 +113,7 @@ class Projectile(Weapon):
     def __init__(self, name, char, colour, attack, thrown):
         super().__init__(name, char, colour, attack)
         self.thrown = thrown  # attack when thrown
+        self.weight = 0.1
 
 
 class Monster(MovingObject):
@@ -136,6 +137,7 @@ class Player(MovingObject):
     wearing: Armour = None
     wielding: Weapon = None
     has_amulet_of_yendor: bool = False
+    inventory_limit = 26
     # rings: [Rings] = []
 
     def __init__(self, armour, weapon):
@@ -144,8 +146,8 @@ class Player(MovingObject):
         self.max_strength = self.strength
         self.wearing = armour
         self.wielding = weapon
-        self.inventory['a'] = armour
-        self.inventory['b'] = weapon
+        self.inventory['a'] = InventoryItem(armour)
+        self.inventory['b'] = InventoryItem(weapon)
 
     @property
     def xp_to_level_up(self):
@@ -160,13 +162,27 @@ class Player(MovingObject):
         return self.wearing.defence if self.wearing is not None else 11
 
 
-class MagicMonster(Monster):
-    pass
-
-
-class MagicItem(FunctioningItem):
-    pass
-
-
 class MagicWand(Projectile):
     pass
+
+
+class InventoryItem:
+    count: int
+    item: Item
+    full: bool
+
+    def __init__(self, item, count=1, max_count=1):
+        self.item = item
+        self.count = count
+        self.max_count = max_count
+
+    def __str__(self):
+        return self.item
+
+    @property
+    def full(self):
+        return self.count == self.max_count
+
+    @property
+    def weight(self):
+        return self.count * self.item.weight

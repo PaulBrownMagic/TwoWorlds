@@ -30,6 +30,7 @@ vim = {"h": "MOVE_LEFT",
        "d": "DROP_ITEM",
        "r": "READ_SCROLL",
        "q": "QUAFF_POTION",
+       "t": "THROW_ITEM",
        "i": "INVENTORY",
        "?": "VIEW_CONTROLS",
        }

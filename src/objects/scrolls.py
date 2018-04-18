@@ -7,7 +7,7 @@ from tcod import color as colour
 from src.config import movements
 from src.gui import message
 from src.maps import distance_to, place_in_room
-from src.objects.actions import get_id_action, get_from_inventory
+from src.objects.actions import get_id_action, get_from_inventory, decr
 from src.objects.datatypes import Scroll, ScrollName
 from src.objects.functions import _move
 from src.objects.monsters import monsters_for, make_monster
@@ -59,9 +59,10 @@ def identify(level):
     if itm is None:
         message("No such item, try again.")
         return identify(level)
-    else:
+    itm = decr(itm, key, level.player.inventory)
+    if hasattr(itm.name, "realname"):
         itm.name.name = itm.name.realname
-        message("You identified {}".format(itm.name))
+    message("You identified {}".format(itm.name))
 
 
 def read_scare_monster(level):
@@ -70,7 +71,7 @@ def read_scare_monster(level):
 
 def teleport(level):
     """Teleport player"""
-    place_in_room(level.map_grid, level.player)
+    place_in_room(level, level.player)
 
 
 def enchant_weapon(level):
@@ -139,7 +140,7 @@ scrolls = [dict(name=Name('Mapping'), world=N, p=4, f=view_whole_map),
            dict(name=Name("Aggravate Monsters"), world=N, p=3,
                 f=aggravate_monsters),
            dict(name=Name("Protect Armour"), world=M, p=2, f=protect_armour),
-           dict(name=Name("Through The Veil"), world=N, p=3,
+           dict(name=Name("Through The Veil"), world=N, p=4,
                 f=transition_worlds),
            ]
 

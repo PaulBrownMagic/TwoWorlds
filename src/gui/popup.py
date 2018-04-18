@@ -45,7 +45,7 @@ def inventory_menu(level):
     inv = level.player.inventory
     header = "Inventory"
     option = "{}) {} {}".format
-    options = [option(l, cap(i.name), info_inv(level, i))
+    options = [option(l, cap(i.item.name), info_inv(level, i.item))
                for l, i in inv.items() if i is not None]
     menu(header, options, 40)
 

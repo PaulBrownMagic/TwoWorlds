@@ -6,10 +6,12 @@ from src.config import movements
 # from src.inputs import movements, get_id_action
 from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
-from src.objects.datatypes import Player, Armour, Weapon, Projectile, Scroll
+from src.objects.datatypes import (Player, Armour, Weapon, Potion,
+                                   Projectile, Scroll, InventoryItem)
 from src.objects.weapons import mace, make_weapon, weapons  # all_weapons
 from src.objects.armour import ringmail, make_armour, armours
 from src.objects.actions import actions
+from src.objects.combat import attack
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
@@ -113,13 +115,31 @@ def autopickup(level):
 
 def pickup(player, item):
     if same_location(player.location, item.location):
+        existing = [l for l, i in player.inventory.items()
+                    if i is not None and i.item.name == item.name]
+        for e in existing:
+            if not player.inventory[e].full:
+                player.inventory[e].count += 1
+                return  # Don't return! Need to pick up.
         spaces = [l for l, i in player.inventory.items() if i is None]
-        if len(spaces) > 0:
-            player.inventory[spaces[0]] = item
+        overburdened = sum([i.weight for i in player.inventory.values()
+                            if i is not None]) >= player.inventory_limit
+        if len(spaces) > 0 and not overburdened:
+            player.inventory[spaces[0]] = make_inventory_item(item)
             item.picked_up = True
+            item.found = False
             message("Rogue picked up {} ({})".format(item.name, spaces[0]))
         else:
             message("Rogue's inventory is full")
+
+
+def make_inventory_item(itm):
+    if type(itm) in [Potion, Scroll]:
+        return InventoryItem(itm, max_count=26)
+    elif type(itm) == Projectile:
+        return InventoryItem(itm, count=randint(1, 15), max_count=50)
+    else:
+        return InventoryItem(itm)
 
 
 def is_flying_targeting(monster):
@@ -144,81 +164,6 @@ def monster_move(level, monster):
         x, y = (next_tile[0] - monster.location.x,
                 next_tile[1] - monster.location.y)
         _move(monster, x, y, level, stationary)
-
-
-def attack(x, y, level):
-    if type(x) == type(y):
-        return
-    msg = "{} attacks {}".format(x.name, y.name)
-    if does_attack_hit(x, y, level.number):
-        y.hp -= damage_done_by(x)
-        if y.hp <= 0:
-            y.state = "DEAD"
-            msg += " and defeats it."
-            update_xp(x, y)
-        else:
-            msg += " and hits."
-    else:
-        msg += " and misses."
-    message(msg)
-
-
-def does_attack_hit(x, y, lvl_num):
-    if type(x) == Player:
-        if x.state == "CONFUSE_NEXT_MONSTER":
-            y.state = "CONFUSED1234567890"
-            x.state = "ACTIVE"
-            message("{} looks confused".format(y.name.capitalize()))
-        elif not y.state.startswith("CONFUSED"):
-            y.state = "TARGETING"
-        if x.strength < 7:
-            mod = x.strength - 7
-        elif x.strength > 23:
-            mod = 3
-        else:
-            mod = (x.strength - 15)//2
-        level = x.xp_level
-        if "F" in y.flags:
-            mod -= 3
-    else:
-        level = lvl_num
-        mod = 0
-        if "F" in x.flags:
-            mod -= 3
-    return randint(1, 20) + mod >= 20 - level - y.armour
-
-
-def damage_done_by(x):
-    mod = 0
-    if type(x) == Player:
-        if x.strength == 16:
-            mod = 1
-        elif x.strength == 17:
-            mod = 2
-        elif x.strength in [18, 19]:
-            mod = 3
-        elif x.strength in [20, 21]:
-            mod = 4
-        elif x.strength > 21:
-            mod = 5
-    return dice_roll(x.attack) + mod
-
-
-def dice_roll(dice):
-    count, sides = map(int, dice.split('d'))
-    return sum([randint(1, sides) for _ in range(count)])
-
-
-def update_xp(x, y):
-    if type(x) == Player:
-        x.xp += y.xp
-        # Level Up
-        if x.xp >= x.xp_to_level_up:
-            x.xp_level += 1
-            hp_up = dice_roll("3d5")
-            x.hp += hp_up
-            x.max_hp += hp_up
-            message("Welcome to level {}".format(x.xp_level))
 
 
 def update_monster_state(level, monster):

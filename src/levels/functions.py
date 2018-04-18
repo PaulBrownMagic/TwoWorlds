@@ -1,7 +1,7 @@
 from functools import partial
 from random import choice, randint
 
-from src.levels.datatypes import Level, MagicLevel
+from src.levels.datatypes import Level
 from src.maps import place_in_room
 from src.objects import (Stairs,
                          get_x_armours,

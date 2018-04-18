@@ -1,10 +1,9 @@
 from src.maps.datatypes import Map
 from src.objects.datatypes import (Item,
                                    Stairs,
-                                   MagicItem,
                                    Player,
                                    Monster,
-                                   MagicMonster)
+                                   )
 
 
 class Level:
@@ -29,9 +28,3 @@ class Level:
     @property
     def all_objects(self):
         return self.items + self.monsters
-
-
-class MagicLevel(Level):
-    items: [MagicItem]
-    monsters: [MagicMonster]
-    world: str = "MAGIC"

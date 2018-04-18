@@ -3,7 +3,7 @@ from random import randint, choice
 from tcod import color as colour
 
 from src.objects.datatypes import Monster
-from src.objects.functions import dice_roll
+from src.objects.combat import dice_roll
 from src.objects.magicmonsters import SL, SN, A, STATES, magic_monsters
 from src.maps import distance_to
 
