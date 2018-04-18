@@ -29,7 +29,6 @@ def run_move_logic(level, user_input):
         autopickup(level)
     elif user_input in actions:
         game_state = actions[user_input](level)
-        print(game_state)
     return game_state if game_state is not None else "PLAYING"
 
 
@@ -118,7 +117,7 @@ def pickup(player, item):
         if len(spaces) > 0:
             player.inventory[spaces[0]] = item
             item.picked_up = True
-            message("Rogue picked up {}".format(item.name))
+            message("Rogue picked up {} ({})".format(item.name, spaces[0]))
         else:
             message("Rogue's inventory is full")
 
@@ -239,9 +238,3 @@ def make_player():
     return Player(weapon=make_weapon(mace),
                   armour=make_armour(ringmail)
                   )
-
-
-def items_for(level):
-    wpns = [make_weapon(choice(weapons)) for _ in range(randint(0, 3))]
-    armrs = [make_armour(choice(armours)) for _ in range(randint(0, 3))]
-    return wpns + armrs

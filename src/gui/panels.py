@@ -45,7 +45,9 @@ def render_messages():
 
 
 def update_panel(level):
-    tcod.console_print(panel, 1, 0, "Level: {}".format(level.number))
+    is_magic = "Magic " if level.world == "MAGIC" else ""
+    tcod.console_print(panel, 1, 0, "{}Level: {}".format(is_magic,
+                                                         level.number))
     render_hp_bar(level.player)
     render_str_bar(level.player)
     arm = 11 - level.player.armour

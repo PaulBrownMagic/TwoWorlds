@@ -23,7 +23,7 @@ def play_level(level):
 
 def setup_level(world, level_number, player):
     level = make_level(world, level_number, player)
-    place_in_room(level.map_grid, player)
+    place_in_room(level, player)
     tcod.map_compute_fov(level.map_grid,
                          player.location.x,
                          player.location.y,
@@ -54,12 +54,14 @@ def play_game():
                     print("WON")
                     break
             else:
-                level_number = level.number + 1
+                level_number += 1
             level = setup_level("NORMAL", level_number, player)
             update_screen(level)
             game_state = "PLAYING"
         elif game_state == "TOGGLE_WORLDS":
             world = "MAGIC" if level.world == "NORMAL" else "NORMAL"
+            if level.world == "MAGIC":
+                level_number += 1
             level = setup_level(world, level_number, player)
             update_screen(level)
             game_state = "PLAYING"

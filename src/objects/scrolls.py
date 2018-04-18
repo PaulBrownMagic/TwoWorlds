@@ -1,6 +1,6 @@
 from itertools import chain
 from math import ceil
-from random import choice, randint
+from random import choice, randint, choices
 
 from tcod import color as colour
 
@@ -8,9 +8,9 @@ from src.config import movements
 from src.gui import message
 from src.maps import distance_to, place_in_room
 from src.objects.actions import get_id_action, get_from_inventory
-from src.objects.datatypes import Scroll
+from src.objects.datatypes import Scroll, ScrollName
 from src.objects.functions import _move
-from src.objects.monsters import monsters_for_level, make_monster
+from src.objects.monsters import monsters_for, make_monster
 
 S_COLOUR = colour.white
 
@@ -60,7 +60,7 @@ def identify(level):
         message("No such item, try again.")
         return identify(level)
     else:
-        itm.name = itm.realname
+        itm.name.name = itm.name.realname
         message("You identified {}".format(itm.name))
 
 
@@ -85,12 +85,12 @@ def enchant_weapon(level):
 
 
 def create_monster(level):
-    monster = make_monster(choice(monsters_for_level(level)))
+    monster = make_monster(choice(monsters_for(level)))
     monster.state = "TARGETING"
     monster.location = level.player.location
     for _ in range(5):
         if monster.location == level.player.location:
-            x, y = choice(movements.values())
+            x, y = movements[choice(list(movements))]
             _move(monster, x, y, level)
         else:
             level.monsters.append(monster)
@@ -118,46 +118,41 @@ def transition_worlds(level):
     message("Everything turns dark, you awaken in a new world")
     return "TOGGLE_WORLDS"
 
+
 N = "NORMAL"
 M = "MAGIC"
 
-scrolls = [dict(name='Mapping', world=N, p=4, f=view_whole_map),
-           dict(name='Confuse Monster', world=N, p=7, f=confuse_next_monster),
-           dict(name='Hold Monster', world=M, p=2, f=hold_monster),
-           dict(name='Sleep', world=M, p=3, f=sleep),
-           dict(name="Enchant Armour", world=M, p=7, f=enchant_armour),
-           dict(name="Identity", world=N, p=7, f=identify),
-           dict(name="Scare Monster", world=M, p=3, f=read_scare_monster),
-           dict(name="Teleportation", world=M, p=5, f=teleport),
-           dict(name="Enchant Weapon", world=M, p=8, f=enchant_weapon),
-           dict(name="Create Monster", world=M, p=4, f=create_monster),
-           # dict(name="Remove Curse", world=M, p=7, f=remove_curse),
-           dict(name="Aggravate Monsters", world=N, p=3, f=aggravate_monsters),
-           dict(name="Protect Armour", world=M, p=2, f=protect_armour),
-           dict(name="Through The Veil", world=N, p=6, f=transition_worlds),
+Name = ScrollName
+scrolls = [dict(name=Name('Mapping'), world=N, p=4, f=view_whole_map),
+           dict(name=Name('Confuse Monster'), world=N, p=7,
+                f=confuse_next_monster),
+           dict(name=Name('Hold Monster'), world=M, p=2, f=hold_monster),
+           dict(name=Name('Sleep'), world=M, p=3, f=sleep),
+           dict(name=Name("Enchant Armour"), world=M, p=7, f=enchant_armour),
+           dict(name=Name("Identity"), world=N, p=7, f=identify),
+           dict(name=Name("Scare Monster"), world=M, p=3,
+                f=read_scare_monster),
+           dict(name=Name("Teleportation"), world=M, p=5, f=teleport),
+           dict(name=Name("Enchant Weapon"), world=M, p=8, f=enchant_weapon),
+           dict(name=Name("Create Monster"), world=M, p=4, f=create_monster),
+           # dict(name=Name("Remove Curse"), world=M, p=7, f=remove_curse),
+           dict(name=Name("Aggravate Monsters"), world=N, p=3,
+                f=aggravate_monsters),
+           dict(name=Name("Protect Armour"), world=M, p=2, f=protect_armour),
+           dict(name=Name("Through The Veil"), world=N, p=3,
+                f=transition_worlds),
            ]
 
 
 def make_scroll(s):
-    return Scroll(name="A scroll titled {}".format(s['name']),
-                  realname="Scroll of {}".format(s['name']),
+    return Scroll(name=s['name'],
                   char="?",
                   colour=S_COLOUR,
                   function=s['f']
                   )
 
 
-def get_x_scrolls_for(level, num):
+def get_x_scrolls_for(num, level):
     allowed_scrolls = [s for s in scrolls if s['world'] == level.world]
-    max_roll = sum([s['p'] for s in allowed_scrolls])
-    scrolls_for_level = []
-    for _ in range(num):
-        roll = randint(0, max_roll)
-        cumulative = 0
-        for s in allowed_scrolls:
-            cumulative
-            if cumulative <= roll <= cumulative + s['p']:
-                scrolls_for_level.append(s)
-                continue
-            cumulative += s['p']
-    return list(map(make_scroll, scrolls_for_level))
+    weights = [s['p'] for s in allowed_scrolls]
+    return list(map(make_scroll, choices(allowed_scrolls, weights, k=num)))

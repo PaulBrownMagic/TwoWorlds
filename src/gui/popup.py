@@ -36,11 +36,16 @@ def info_inv(level, item):
         return ""
 
 
+def cap(name):
+    name = str(name)
+    return name[0].upper() + name[1:]
+
+
 def inventory_menu(level):
     inv = level.player.inventory
     header = "Inventory"
     option = "{}) {} {}".format
-    options = [option(l, i.name, info_inv(level, i))
+    options = [option(l, cap(i.name), info_inv(level, i))
                for l, i in inv.items() if i is not None]
     menu(header, options, 40)
 

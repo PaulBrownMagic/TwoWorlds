@@ -1,6 +1,6 @@
 import tcod
 
-from src.objects.datatypes import Scroll, Armour, Weapon, Projectile
+from src.objects.datatypes import Scroll, Armour, Weapon, Projectile, Potion
 from src.gui import inventory_menu, controls_menu, message, update_screen
 
 
@@ -91,9 +91,24 @@ def read_scroll(level):
         return
     if type(itm) == Scroll:
         level.player.inventory[i] = None
+        itm.name.name = itm.name.realname
         return itm.function(level)
     else:
         message("Can't read {}".format(itm.name))
+
+
+def quaff_potion(level):
+    message("Quaff what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        return
+    if type(itm) == Potion:
+        level.player.inventory[i] = None
+        itm.name.name = itm.name.realname
+        return itm.function(level)
+    else:
+        message("Can't quaff {}".format(itm.name))
 
 
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
@@ -103,4 +118,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "INVENTORY": inventory_menu,
            "VIEW_CONTROLS": controls_menu,
            "READ_SCROLL": read_scroll,
+           "QUAFF_POTION": quaff_potion,
            }

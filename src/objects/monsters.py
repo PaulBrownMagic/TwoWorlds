@@ -85,7 +85,12 @@ def make_monster(m):
                    )
 
 
-def monsters_for_level(level):
+def monsters_for(level):
     i = level.number
     return [m for m in monsters[level.world]
             if min(m['levels']) <= i and max(m['levels']) >= i]
+
+
+def get_x_monsters_for(num, level):
+    appropriate_monsters = monsters_for(level)
+    return [make_monster(choice(appropriate_monsters)) for _ in range(num)]

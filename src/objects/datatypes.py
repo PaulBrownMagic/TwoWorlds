@@ -1,8 +1,36 @@
+from random import randint
 from types import FunctionType
 
 from tcod import color as colour
 
 from src.maps.datatypes import Location
+from src.objects.name_gen import name_generator
+
+
+class Name:
+    name: str
+    realname: str
+
+    def __init__(self, name, obj_type):
+        randname = " ".join([name_generator.new()
+                              for _ in range(randint(1, 3))])
+        self.name = "a {} titled {}".format(obj_type, randname)
+        self.realname = "a {} of {}".format(obj_type, name)
+
+    def __str__(self):
+        return self.name
+
+
+class PotionName(Name):
+
+    def __init__(self, name):
+        super().__init__(name, "Potion")
+
+
+class ScrollName(Name):
+
+    def __init__(self, name):
+        super().__init__(name, "Scroll")
 
 
 class Object:
@@ -50,15 +78,17 @@ class Item(Object):
 
 class FunctioningItem(Item):
     function: FunctionType
-    realname: str  # name when identified
 
-    def __init__(self, name, realname, char, colour, function):
+    def __init__(self, name, char, colour, function):
         super().__init__(name, char, colour)
         self.function = function
-        self.realname = realname
 
 
 class Scroll(FunctioningItem):
+    pass
+
+
+class Potion(FunctioningItem):
     pass
 
 
