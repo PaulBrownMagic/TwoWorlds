@@ -60,7 +60,8 @@ def identify(level):
         message("No such item, try again.")
         return identify(level)
     else:
-        itm.name.name = itm.name.realname
+        if hasattr(itm.name, "realname"):
+            itm.name.name = itm.name.realname
         message("You identified {}".format(itm.name))
 
 
@@ -70,7 +71,7 @@ def read_scare_monster(level):
 
 def teleport(level):
     """Teleport player"""
-    place_in_room(level.map_grid, level.player)
+    place_in_room(level, level.player)
 
 
 def enchant_weapon(level):
@@ -139,7 +140,7 @@ scrolls = [dict(name=Name('Mapping'), world=N, p=4, f=view_whole_map),
            dict(name=Name("Aggravate Monsters"), world=N, p=3,
                 f=aggravate_monsters),
            dict(name=Name("Protect Armour"), world=M, p=2, f=protect_armour),
-           dict(name=Name("Through The Veil"), world=N, p=3,
+           dict(name=Name("Through The Veil"), world=N, p=4,
                 f=transition_worlds),
            ]
 

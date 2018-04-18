@@ -1,6 +1,12 @@
 import tcod
 
-from src.objects.datatypes import Scroll, Armour, Weapon, Projectile, Potion
+from src.config import arrows, vim, movements
+from src.maps import same_location, Location, is_walkable
+from src.maps.datatypes import Tile
+from src.objects.combat import (dice_roll, does_attack_hit,
+                                thrown_damage_done_by, make_attack)
+from src.objects.datatypes import (Scroll, Armour, Weapon,
+                                   Projectile, Potion, Monster)
 from src.gui import inventory_menu, controls_menu, message, update_screen
 
 
@@ -111,6 +117,65 @@ def quaff_potion(level):
         message("Can't quaff {}".format(itm.name))
 
 
+def is_direction_key(key):
+    is_arrow_key = key.vk in list(arrows)
+    is_vim_key = key.vk == 66 and key.text in "hjklyubn"
+    return is_arrow_key or is_vim_key
+
+
+def get_dir_action(level):
+    message("direction?")
+    update_screen(level)
+    key = tcod.console_wait_for_keypress(flush=False)
+    while not is_direction_key(key):
+        key = tcod.console_wait_for_keypress(flush=False)
+    if key.vk in arrows:
+        return arrows[key.vk]
+    elif key.vk == 66 and key.text in "hjklyubn":
+        return vim[key.text]
+
+
+def find_target(direction, level):
+    x, y = level.player.location
+    dx, dy = movements[direction]
+    for _ in range(8):
+        new_location = Location(x + dx, y + dy)
+        if not is_walkable(new_location, level):
+            return Location(x, y)
+        monsters = [m for m in level.monsters
+                    if same_location(m.location, new_location)]
+        if len(monsters) > 0:
+            return monsters[0]
+        x += dx
+        y += dy
+    return new_location
+
+
+def throw_item(level):
+    target = find_target(get_dir_action(level), level)
+    message("Throw what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        message("No such item")
+        return
+    if itm in [level.player.wearing, level.player.wielding]:
+        message("Rogue is using {}, can't throw it".format(itm.name))
+        return
+    level.player.inventory[i] = None
+    if type(target) == Location:
+        itm.location = target
+        level.items.append(itm)
+        itm.picked_up = False
+        message("Rogue threw {}".format(itm.name))
+    elif type(target) == Monster:
+        if does_attack_hit(level.player, target, level.number):
+            make_attack(level.player, target,
+                        thrown_damage_done_by(itm, level.player))
+        else:
+            message("{} attacks {} and misses".format(x.name, y.name))
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -119,4 +184,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "VIEW_CONTROLS": controls_menu,
            "READ_SCROLL": read_scroll,
            "QUAFF_POTION": quaff_potion,
+           "THROW_ITEM": throw_item,
            }

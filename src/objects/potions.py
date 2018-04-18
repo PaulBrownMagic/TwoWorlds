@@ -51,21 +51,21 @@ def heal(level):
     """Heal Player"""
     hp = level.player.hp
     max_hp = level.player.max_hp
-    hp += randint(1, level.player.xp_level)
+    level.player.hp += randint(1, level.player.xp_level)
     if hp >= max_hp:
-        max_hp += 1
-        hp = max_hp
+        level.player.max_hp += 1
+        level.player.hp = level.player.max_hp
     message("Rogue feels better")
 
 
 def extra_healing(level):
     """Extra healing for Player"""
     hp = level.player.hp
-    hp_max = level.player.max_hp
-    hp += sum([randint(1, 8) for _ in range(level.player.xp_level)])
+    max_hp = level.player.max_hp
+    level.player.hp += sum([randint(1, 8) for _ in range(level.player.xp_level)])
     if hp >= max_hp:
-        max_hp += randint(1, 2)
-        hp = max_hp
+        level.player.max_hp += randint(1, 2)
+        level.player.hp = level.player.max_hp
     message("Rogue feels *much* better")
 
 
