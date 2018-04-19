@@ -4,8 +4,18 @@ import tcod
 
 from src.config import movements, HUNGRY, HUNGRY_DIE, HUNGRY_WEAK, HUNGRY_FEINT
 # from src.inputs import movements, get_id_action
-from src.maps import Location, is_blocked, is_walkable, same_location
-from src.gui import message, update_screen, inventory_menu, controls_menu
+from src.maps import (Location,
+                      is_blocked,
+                      is_walkable,
+                      same_location,
+                      place_in_room,
+                      distance_to)
+from src.gui import (message,
+                     update_screen,
+                     inventory_menu,
+                     controls_menu,
+                     died_screen
+                     )
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
                                    Projectile, Scroll, InventoryItem,
                                    MagicWand, Food, Fruit)
@@ -14,6 +24,7 @@ from src.objects.armour import ringmail, make_armour, armours
 from src.objects.actions import actions
 from src.objects.combat import attack
 from src.objects.food import foods, make_food
+from src.objects.monsters import monsters_for, make_monster
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
@@ -23,6 +34,9 @@ move_ticker = 1
 
 def run_move_logic(level, user_input):
     game_state = None
+    if level.player.state == "DEAD":
+        died_screen(level)
+        return "PLAYER_DEAD"
     if user_input in movements:
         tick_move(level)
         if getting_hungry(level.player):
@@ -46,6 +60,18 @@ def tick_move(level):
         for mon in filter(lambda m: "R" in m.flags, level.monsters):
             regen_health(mon, level.number)
         regen_health(level.player, level.number)
+    if move_ticker % 50 == 0:
+        add_monster(level)
+    if move_ticker % 20 == 0 and move_ticker % 50 == 0:
+        move_ticker = 1
+
+
+def add_monster(level):
+    new_monster = make_monster(choice(monsters_for(level)))
+    place_in_room(level, new_monster)
+    while distance_to(level.player.location, new_monster.location) < 24:
+        place_in_room(level, new_monster)
+    level.monsters.append(new_monster)
 
 
 def getting_hungry(player):

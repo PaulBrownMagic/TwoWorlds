@@ -51,7 +51,6 @@ def play_game():
                 level_number = level.number - 1
                 if level_number == 0:
                     game_state = "WON"
-                    print("WON")
                     break
             else:
                 level_number += 1
@@ -65,6 +64,11 @@ def play_game():
             level = setup_level(world, level_number, player)
             update_screen(level)
             game_state = "PLAYING"
-        elif game_state == "PLAYER DEAD":
-            print("GAME OVER")
+        elif game_state == "PLAYER_DEAD":
             break
+    if game_state == "EXIT":
+        print("Thanks for playing!")
+    elif game_state == "WON":
+        print("Congratulations, I suppose.")
+    elif game_state == "PLAYER_DEAD":
+        print("Oops, you died. Better luck next time.")
