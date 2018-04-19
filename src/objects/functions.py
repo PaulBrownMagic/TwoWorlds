@@ -37,18 +37,19 @@ def run_move_logic(level, user_input):
     if level.player.state == "DEAD":
         return "PLAYER_DEAD"
     if user_input in movements:
-        tick_move(level)
         if getting_hungry(level.player):
             x, y = movements[user_input]
             _move(level.player, x, y, level)
-        for monster in level.monsters:
-            monster_move(level, monster)
         find_stairs(level)
         autopickup(level)
         game_state = triggertrap(level)
     elif user_input in actions:
         action_state = actions[user_input](level)
         game_state = action_state if game_state is None else game_state
+    if user_input in movements or user_input in actions:
+        tick_move(level)
+        for monster in level.monsters:
+            monster_move(level, monster)
     return "PLAYING" if game_state is None else game_state
 
 
@@ -187,7 +188,7 @@ def pickup(player, item):
                     if i is not None and i.item.name == item.name]
         for e in existing:
             if not player.inventory[e].full:
-                more_items(item, player.inventory[e])
+                more_items(item, player.inventory, e)
                 item.picked_up = True
                 message("Rogue picked up {} ({})".format(item.name, e))
                 return
@@ -206,15 +207,12 @@ def pickup(player, item):
             message("Rogue's inventory is full")
 
 
-def more_items(item, slot):
-    if type(item) in [MagicWand, Projectile]:
+def more_items(item, inventory, slot):
+    if type(item) == MagicWand:
         incr = randint(2, 10)
     else:
         incr = 1
-    if slot.count + incr < slot.max_count:
-        slot.count += incr
-    else:
-        slot.count = slot.max_count
+    inventory[slot].count += incr
 
 
 def make_inventory_item(itm):

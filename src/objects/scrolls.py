@@ -59,7 +59,7 @@ def identify(level):
     if itm is None:
         message("No such item, try again.")
         return identify(level)
-    itm = decr(itm, key, level.player.inventory)
+    itm = itm.item
     if hasattr(itm.name, "realname"):
         itm.name.name = itm.name.realname
     message("You identified {}".format(itm.name))

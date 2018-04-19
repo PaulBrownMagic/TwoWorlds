@@ -45,7 +45,6 @@ class WandName:
         a_an = "An" if material[0] in "AEIOU" else "A"
         self.name = "{} {} Wand".format(a_an, material)
         self.realname = "Wand of {}".format(name)
-        self.name = self.realname
 
     def __str__(self):
         return self.name

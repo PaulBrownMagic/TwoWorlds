@@ -92,6 +92,8 @@ def drop_item(level):
     if itm.item in [level.player.wearing, level.player.wielding]:
         message("Rogue is using {}, can't drop it".format(itm.item.name))
     else:
+        if type(itm) == MagicWand:
+            itm.count = 1  # Let decr drop the whole wand
         itm = decr(itm, i, level.player.inventory)
         itm.picked_up = False
         itm.location = level.player.location
@@ -184,6 +186,7 @@ def throw_item(level):
         if does_attack_hit(level.player, target, level.number):
             make_attack(level.player, target,
                         thrown_damage_done_by(itm, level.player))
+            
         else:
             message("Rogue attacks {} and misses".format(target.name))
 
