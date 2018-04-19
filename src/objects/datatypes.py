@@ -92,6 +92,10 @@ class Potion(FunctioningItem):
     pass
 
 
+class Trap(FunctioningItem):
+    pass
+
+
 class Armour(Item):
     defence: int
 

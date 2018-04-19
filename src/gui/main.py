@@ -56,17 +56,27 @@ def draw_map(mp, world):
 def draw_in_map(mp, item):
     in_fov = tcod.map_is_in_fov(mp, item.location.x, item.location.y)
     if in_fov or item.found:
-        tcod.console_put_char(con, item.location.x, item.location.y, item.char)
-        tcod.console_set_char_foreground(con,
-                                         item.location.x,
-                                         item.location.y,
-                                         item.colour)
+        _draw(item)
+
+
+def draw_trap(trap):
+    if trap.found:
+        _draw(trap)
+
+
+def _draw(item):
+    tcod.console_put_char(con, item.location.x, item.location.y, item.char)
+    tcod.console_set_char_foreground(con,
+                                     item.location.x,
+                                     item.location.y,
+                                     item.colour)
 
 
 def update_screen(level):
     draw = partial(draw_in_map, level.map_grid)
     draw_map(level.map_grid, level.world)
     draw(level.stairs)
+    list(map(draw_trap, level.traps))
     list(map(draw, level.items))
     list(map(draw, level.monsters))
     draw(level.player)

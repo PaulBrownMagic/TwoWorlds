@@ -29,9 +29,11 @@ def run_move_logic(level, user_input):
             monster_move(level, monster)
         find_stairs(level)
         autopickup(level)
+        game_state = triggertrap(level)
     elif user_input in actions:
-        game_state = actions[user_input](level)
-    return game_state if game_state is not None else "PLAYING"
+        action_state = actions[user_input](level)
+        game_state = action_state if game_state is None else game_state
+    return "PLAYING" if game_state is None else game_state
 
 
 def tick_move(level):
@@ -111,6 +113,14 @@ def autopickup(level):
             if same_location(level.player.location, item.location)]
     for itm in itms:
         pickup(level.player, itm)
+
+
+def triggertrap(level):
+    traps = [trap for trap in level.traps
+             if same_location(level.player.location, trap.location)]
+    for trap in traps:
+        trap.found = True
+        return trap.function(level)
 
 
 def pickup(player, item):

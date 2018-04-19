@@ -9,6 +9,7 @@ from src.objects import (Stairs,
                          get_x_monsters_for,
                          get_x_scrolls_for,
                          get_x_potions,
+                         get_x_traps_for,
                          )
 
 
@@ -18,8 +19,6 @@ def make_level(world, level_number, player):
                   level_number,
                   player,
                   stairs,
-                  [],
-                  [],
                   )
 
     level.monsters = get_x_monsters_for(randint(4, 8), level)
@@ -27,11 +26,12 @@ def make_level(world, level_number, player):
     level.items += get_x_weapons(randint(0, 3))
     level.items += get_x_scrolls_for(randint(1, 4), level)
     level.items += get_x_potions(randint(1, 4))
-
+    level.traps = get_x_traps_for(randint(0, 2+level.number//4), level)
     place = partial(place_in_room, level)
     place(stairs)
     list(map(place, level.monsters))
     list(map(place, level.items))
+    list(map(place, level.traps))
     return level
 
 

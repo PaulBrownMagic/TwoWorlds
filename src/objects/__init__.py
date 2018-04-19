@@ -5,3 +5,4 @@ from src.objects.scrolls import get_x_scrolls_for
 from src.objects.potions import get_x_potions
 from src.objects.weapons import get_x_weapons
 from src.objects.armour import get_x_armours
+from src.objects.traps import get_x_traps_for
