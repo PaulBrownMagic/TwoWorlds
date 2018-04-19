@@ -7,3 +7,4 @@ from src.objects.weapons import get_x_weapons
 from src.objects.armour import get_x_armours
 from src.objects.traps import get_x_traps_for
 from src.objects.magicwands import get_x_wands
+from src.objects.food import get_x_foods

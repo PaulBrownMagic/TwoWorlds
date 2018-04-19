@@ -2,17 +2,18 @@ from random import randint, choice
 
 import tcod
 
-from src.config import movements
+from src.config import movements, HUNGRY, HUNGRY_DIE, HUNGRY_WEAK, HUNGRY_FEINT
 # from src.inputs import movements, get_id_action
 from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
                                    Projectile, Scroll, InventoryItem,
-                                   MagicWand)
+                                   MagicWand, Food, Fruit)
 from src.objects.weapons import mace, make_weapon, shortbow, arrow
 from src.objects.armour import ringmail, make_armour, armours
 from src.objects.actions import actions
 from src.objects.combat import attack
+from src.objects.food import foods, make_food
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
@@ -24,8 +25,9 @@ def run_move_logic(level, user_input):
     game_state = None
     if user_input in movements:
         tick_move(level)
-        x, y = movements[user_input]
-        _move(level.player, x, y, level)
+        if getting_hungry(level.player):
+            x, y = movements[user_input]
+            _move(level.player, x, y, level)
         for monster in level.monsters:
             monster_move(level, monster)
         find_stairs(level)
@@ -44,6 +46,20 @@ def tick_move(level):
         for mon in filter(lambda m: "R" in m.flags, level.monsters):
             regen_health(mon, level.number)
         regen_health(level.player, level.number)
+
+
+def getting_hungry(player):
+    player.hunger += 1
+    if player.hunger == HUNGRY:
+        message("Rogue is hungry")
+    if player.hunger == HUNGRY_WEAK:
+        message("Rogue is weak")
+    if player.hunger in HUNGRY_FEINT:
+        message("Rogue is faint")
+        return False  # Can't move
+    if player.hunger > HUNGRY_DIE:
+        player.state = "DEAD"
+    return True  # Move
 
 
 def do_hp_regen(level, mt):
@@ -130,7 +146,7 @@ def pickup(player, item):
                     if i is not None and i.item.name == item.name]
         for e in existing:
             if not player.inventory[e].full:
-                player.inventory[e].count += 1
+                more_items(item, player.inventory[e])
                 item.picked_up = True
                 message("Rogue picked up {} ({})".format(item.name, e))
                 return
@@ -146,8 +162,19 @@ def pickup(player, item):
             message("Rogue's inventory is full")
 
 
+def more_items(item, slot):
+    if type(item) in [MagicWand, Projectile]:
+        incr = randint(2, 10)
+    else:
+        incr = 1
+    if slot.count + incr < slot.max_count:
+        slot.count += incr
+    else:
+        slot.count = slot.max_count
+
+
 def make_inventory_item(itm):
-    if type(itm) in [Potion, Scroll]:
+    if type(itm) in [Potion, Scroll, Food, Fruit]:
         return InventoryItem(itm, max_count=26)
     elif type(itm) == Projectile:
         return InventoryItem(itm, count=randint(1, 15), max_count=50)
@@ -197,7 +224,10 @@ def update_monster_state(level, monster):
 def make_player():
     player = Player(weapon=make_weapon(mace),
                     armour=make_armour(ringmail),
-                    items=[make_weapon(shortbow), make_weapon(arrow)]
+                    items=[make_weapon(shortbow),
+                           make_weapon(arrow),
+                           make_food(foods[0]),
+                           ]
                     )
     for itm in player.inventory.values():
         if itm.item.name == "Arrow":

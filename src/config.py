@@ -33,6 +33,7 @@ vim = {"h": "MOVE_LEFT",
        "t": "THROW_ITEM",
        "z": "ZAP_WAND",
        "i": "INVENTORY",
+       "e": "EAT",
        "?": "VIEW_CONTROLS",
        }
 
@@ -46,3 +47,9 @@ movements = {"MOVE_UP": (0, -1),
              "MOVE_DOWN_RIGHT": (1, 1),
              "WAIT": (0, 0),
              }
+
+HUNGRY = 1000
+HUNGRY_WEAK = 1500
+step = 20
+HUNGRY_FEINT = [HUNGRY_WEAK + x for x in range(0, 5*step, step)]
+HUNGRY_DIE = HUNGRY_FEINT[-1] + 5

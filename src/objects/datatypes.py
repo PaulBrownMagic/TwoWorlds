@@ -114,6 +114,17 @@ class Trap(FunctioningItem):
     pass
 
 
+class Food(FunctioningItem):
+
+    def __init__(self, name, char, colour, function, taste):
+        super().__init__(name, char, colour, function)
+        self.taste = taste
+
+
+class Fruit(Food):
+    pass
+
+
 class Armour(Item):
     defence: int
 
@@ -160,6 +171,7 @@ class Player(MovingObject):
     wielding: Weapon = None
     has_amulet_of_yendor: bool = False
     inventory_limit = 26
+    hunger: int = 0
     # rings: [Rings] = []
 
     def __init__(self, armour, weapon, items):

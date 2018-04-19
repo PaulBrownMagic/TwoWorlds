@@ -11,6 +11,7 @@ from src.objects import (Stairs,
                          get_x_potions,
                          get_x_traps_for,
                          get_x_wands,
+                         get_x_foods,
                          )
 
 
@@ -21,6 +22,9 @@ def make_level(world, level_number, player):
                   player,
                   stairs,
                   )
+
+    amount_of_food = randint(0, 2) if player.hunger > 200 else randint(1, 3)
+    level.items = get_x_foods(amount_of_food)
     if world == "NORMAL":
         add_normal_items(level)
     else:
@@ -38,14 +42,14 @@ def make_level(world, level_number, player):
 
 
 def add_normal_items(level):
-    level.items = get_x_armours(randint(0, 3))
+    level.items += get_x_armours(randint(0, 3))
     level.items += get_x_weapons(randint(0, 3))
     level.items += get_x_scrolls_for(randint(1, 4), level)
     level.items += get_x_potions(randint(0, 3))
 
 
 def add_magic_items(level):
-    level.items = get_x_scrolls_for(randint(1, 4), level)
+    level.items += get_x_scrolls_for(randint(1, 4), level)
     level.items += get_x_potions(randint(1, 4))
     level.items += get_x_wands(randint(0, 3+level.number//4))
 

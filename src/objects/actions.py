@@ -7,7 +7,7 @@ from src.objects.combat import (dice_roll, does_attack_hit,
                                 thrown_damage_done_by, make_attack)
 from src.objects.datatypes import (Scroll, Armour, Weapon,
                                    Projectile, Potion, Monster,
-                                   MagicWand)
+                                   MagicWand, Food, Fruit)
 from src.gui import inventory_menu, controls_menu, message, update_screen
 
 
@@ -206,6 +206,21 @@ def zap_wand(level):
         message("Rogue has no target")
 
 
+def eat(level):
+    message("Eat what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None:
+        message("No such food")
+    if not type(itm.item) in [Food, Fruit]:
+        message("Can't eat {}".format(itm.item.name))
+    else:
+        itm = decr(itm, i, level.player.inventory)
+        message("Rogue eats the {}, it tastes {}".format(itm.name,
+                                                         itm.taste))
+        itm.function(level)
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -216,4 +231,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "QUAFF_POTION": quaff_potion,
            "THROW_ITEM": throw_item,
            "ZAP_WAND": zap_wand,
+           "EAT": eat,
            }
