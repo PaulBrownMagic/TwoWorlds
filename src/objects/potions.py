@@ -1,3 +1,4 @@
+from itertools import chain
 from random import randint, choices
 
 from tcod import color as colour
@@ -39,12 +40,11 @@ def see_hidden(level):
     pass
 
 
-def haste(level):
-    pass
-
-
 def blindness(level):
-    pass
+    level.player.state = "BLIND_300"
+    for tile in chain(*level.map_grid.tiles):
+        tile.explored = False
+    message("A veil of darkness falls around you")
 
 
 def heal(level):
@@ -53,6 +53,7 @@ def heal(level):
     if level.player.hp >= level.player.max_hp:
         level.player.max_hp += 1
         level.player.hp = level.player.max_hp
+    level.player.state = "ACTIVE"
     message("Rogue feels better")
 
 
@@ -64,6 +65,7 @@ def extra_healing(level):
     if hp >= max_hp:
         level.player.max_hp += randint(1, 2)
         level.player.hp = level.player.max_hp
+    level.player.state = "ACTIVE"
     message("Rogue feels *much* better")
 
 
@@ -104,9 +106,8 @@ potions = [dict(name=Name("Confusion"), p=7, f=confuse),
            dict(name=Name("Item Detection"), p=6, f=item_detect),
            dict(name=Name("Raise Level"), p=2, f=xp_up),
            dict(name=Name("Extra Healing"), p=5, f=extra_healing),
-           # dict(name=Name("Haste Self"), p=5, f=haste),
            dict(name=Name("Restore Strength"), p=13, f=restore_stength),
-           # dict(name=Name("Blindness"), p=5, f=blindness),
+           dict(name=Name("Blindness"), p=5, f=blindness),
            ]
 
 

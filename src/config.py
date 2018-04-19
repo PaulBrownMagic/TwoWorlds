@@ -34,6 +34,7 @@ vim = {"h": "MOVE_LEFT",
        "z": "ZAP_WAND",
        "i": "INVENTORY",
        "e": "EAT",
+       "m": "MOVE_WITHOUT_PICKING_UP",
        ",": "PICK_UP_ITEM",
        "?": "VIEW_CONTROLS",
        }

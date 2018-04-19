@@ -7,6 +7,7 @@ from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE
 from src.gui.config import FONT, COLOURS
 from src.gui.panels import panel, update_panel
 from src.maps.config import MAP_HEIGHT
+from src.maps import same_location
 
 tcod.console_set_custom_font(FONT,
                              tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GRAYSCALE)
@@ -41,16 +42,40 @@ def draw_map(mp, world):
         x, y = tile.location
         if tcod.map_is_in_fov(mp, x, y):
             fov = "LIT"
-            mp.tiles[y][x].explored = True
+            tile.explored = True
         else:
             fov = "DARK"
-        if mp.tiles[y][x].explored:
+        if tile.explored:
             tcod.console_put_char_ex(con,
                                      x,
                                      y,
                                      tile_char(mp, x, y),
-                                     (0, 0, 0),
+                                     tcod.color.black,
                                      tile_colour(mp, world, fov, x, y))
+
+
+def blind_draw_map(level):
+    remaining = int(level.player.state.split("_")[-1])
+    remaining -= 1
+    if remaining == 0:
+        level.player.state = "ACTIVE"
+    else:
+        level.player.state = "BLIND_{}".format(remaining)
+    for tile in chain(*level.map_grid.tiles):
+        x, y = tile.location
+        in_fov = tcod.map_is_in_fov(level.map_grid, x, y)
+        if not in_fov:
+            tile.explored = False
+        elif same_location(level.player.location, tile.location):
+            tile.explored = True
+        if tile.explored:
+            tcod.console_put_char_ex(con,
+                                     x, y,
+                                     tile_char(level.map_grid, x, y),
+                                     tcod.color.black,
+                                     tile_colour(level.map_grid, level.world,
+                                                 "DARK", x, y)
+                                     )
 
 
 def draw_in_map(mp, item):
@@ -75,11 +100,14 @@ def _draw(item):
 
 def update_screen(level):
     draw = partial(draw_in_map, level.map_grid)
-    draw_map(level.map_grid, level.world)
-    draw(level.stairs)
-    list(map(draw_trap, level.traps))
-    list(map(draw, level.items))
-    list(map(draw, level.monsters))
+    if level.player.state.startswith("BLIND"):
+        blind_draw_map(level)
+    else:
+        draw_map(level.map_grid, level.world)
+        draw(level.stairs)
+        list(map(draw_trap, level.traps))
+        list(map(draw, level.items))
+        list(map(draw, level.monsters))
     draw(level.player)
     update_panel(level)
     tcod.console_blit(src=con, x=0, y=0,

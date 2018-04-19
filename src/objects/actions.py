@@ -1,15 +1,20 @@
+from functools import partial
+
 import tcod
 
-from src.config import arrows, vim, movements
-from src.maps import same_location, Location, is_walkable
+from src.config import (arrows, vim, movements,
+                        HUNGRY, HUNGRY_DIE, HUNGRY_WEAK, HUNGRY_FEINT)
+from src.maps import same_location, Location, is_walkable, is_blocked
+
 from src.maps.datatypes import Tile
 from src.objects.combat import (dice_roll, does_attack_hit,
                                 thrown_damage_done_by, make_attack)
-from src.objects.datatypes import (Scroll, Armour, Weapon,
+from src.objects.datatypes import (Scroll, Armour, Weapon, Player,
                                    Projectile, Potion, Monster,
                                    MagicWand, Food, Fruit, InventoryItem)
 from src.gui import inventory_menu, controls_menu, message, update_screen
 from src.objects.amulet import is_amulet
+from src.objects.combat import attack
 
 
 def get_id_action(level):
@@ -267,7 +272,7 @@ def pickup(player, item):
                 player.has_amulet_of_yendor = True
             message("Rogue picked up {} ({})".format(item.name, spaces[0]))
         else:
-            message("Rogue's inventory is full")
+            message("Inventory is full, moved onto {}".format(item.name))
 
 
 def more_items(item, inventory, slot):
@@ -296,6 +301,84 @@ def is_scare_monster(item):
         return False
 
 
+def is_functioning(item):
+    return hasattr(item, "function")
+
+
+def monsters_are_scared(level):
+    on_tile = partial(same_location, level.player.location)
+    itms = list(filter(is_scare_monster,
+                       filter(is_functioning,
+                              [item for item in level.items
+                               if on_tile(item.location)])))
+    return True if len(itms) > 0 else False
+
+
+def getting_hungry(player):
+    player.hunger += 1
+    if player.hunger == HUNGRY:
+        message("Rogue is hungry")
+    if player.hunger == HUNGRY_WEAK:
+        message("Rogue is weak")
+    if player.hunger in HUNGRY_FEINT:
+        message("Rogue is faint")
+        return False  # Can't move
+    if player.hunger > HUNGRY_DIE:
+        player.state = "DEAD"
+    return True  # Move
+
+
+def move_no_pickup(level):
+    if getting_hungry(level.player):
+        x, y = movements[get_dir_action(level)]
+        _move(level.player, x, y, level)
+
+
+def _move(obj, x, y, level, stationary=False):
+    if type(obj) == Player and player_sleeping(level):
+        return False
+    if is_confused(obj):
+        x, y = movements[choice(list(movements))]
+    new_location = Location(obj.location.x + x, obj.location.y + y)
+    blocked = is_blocked(new_location, level)
+    walkable = is_walkable(new_location, level)
+    scared = monsters_are_scared(level)
+    if walkable and not blocked and not stationary:
+        obj.location = new_location
+        return True
+    elif walkable and blocked and not (type(obj) == Monster and
+                                       scared):
+        monsters = filter(lambda x: x.location == new_location and x.blocks,
+                          level.monsters + [level.player])
+        for monster in monsters:
+            attack(obj, monster, level)
+        return False
+
+
+def is_confused(obj):
+    confused = False
+    if obj.state == "CONFUSED":
+        obj.state = "ACTIVE"
+        message("{} is no longer confused".format(obj.name.capitalize()))
+    elif obj.state.startswith("CONFUSED"):
+        obj.state = obj.state[:-1]
+        confused = True
+    return confused
+
+
+def player_sleeping(level):
+    player = level.player
+    sleeping = False
+    if player.state == "SLEEP":
+        player.state = "ACTIVE"
+        message("Rogue awakens")
+    elif player.state.startswith("SLEEP"):
+        message("Rogue sleeps")
+        player.state = player.state[:-1]
+        sleeping = True
+    return sleeping
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -308,4 +391,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "ZAP_WAND": zap_wand,
            "EAT": eat,
            "PICK_UP_ITEM": autopickup,
+           "MOVE_WITHOUT_PICKING_UP": move_no_pickup,
            }
