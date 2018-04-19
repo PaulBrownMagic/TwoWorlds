@@ -49,10 +49,8 @@ def blindness(level):
 
 def heal(level):
     """Heal Player"""
-    hp = level.player.hp
-    max_hp = level.player.max_hp
-    level.player.hp += randint(1, level.player.xp_level)
-    if hp >= max_hp:
+    level.player.hp += randint(1, 1 + level.player.xp_level)
+    if level.player.hp >= level.player.max_hp:
         level.player.max_hp += 1
         level.player.hp = level.player.max_hp
     message("Rogue feels better")

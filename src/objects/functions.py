@@ -7,7 +7,8 @@ from src.config import movements
 from src.maps import Location, is_blocked, is_walkable, same_location
 from src.gui import message, update_screen, inventory_menu, controls_menu
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
-                                   Projectile, Scroll, InventoryItem)
+                                   Projectile, Scroll, InventoryItem,
+                                   MagicWand)
 from src.objects.weapons import mace, make_weapon, shortbow, arrow
 from src.objects.armour import ringmail, make_armour, armours
 from src.objects.actions import actions
@@ -150,6 +151,8 @@ def make_inventory_item(itm):
         return InventoryItem(itm, max_count=26)
     elif type(itm) == Projectile:
         return InventoryItem(itm, count=randint(1, 15), max_count=50)
+    elif type(itm) == MagicWand:
+        return InventoryItem(itm, count=itm.count, max_count=26)
     else:
         return InventoryItem(itm)
 

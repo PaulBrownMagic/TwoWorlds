@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 from types import FunctionType
 
 from tcod import color as colour
@@ -31,6 +31,24 @@ class ScrollName(Name):
 
     def __init__(self, name):
         super().__init__(name, "Scroll")
+
+
+class WandName:
+    materials = ["Ebony", "Birch", "Mahogany", "Ash", "Beech", "Iron Wood",
+                 "Redwood", "Silver", "Citrine", "Brass", "Honeysuckle",
+                 "Amethyst", "Cherry", "Quartz", "Copper", "Lapis Lazuli",
+                 "Maple", "Oak", "Surina", "Unikite"]
+
+    def __init__(self, name):
+        material = choice(WandName.materials)
+        WandName.materials.remove(material)
+        a_an = "An" if material[0] in "AEIOU" else "A"
+        self.name = "{} {} Wand".format(a_an, material)
+        self.realname = "Wand of {}".format(name)
+        self.name = self.realname
+
+    def __str__(self):
+        return self.name
 
 
 class Object:
@@ -168,8 +186,12 @@ class Player(MovingObject):
         return self.wearing.defence if self.wearing is not None else 11
 
 
-class MagicWand(Projectile):
-    pass
+class MagicWand(FunctioningItem):
+
+    def __init__(self, name, char, colour, function, count):
+        super().__init__(name, char, colour, function)
+        self.weight = 0.1
+        self.count = count
 
 
 class InventoryItem:

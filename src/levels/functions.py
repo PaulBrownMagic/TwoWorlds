@@ -10,6 +10,7 @@ from src.objects import (Stairs,
                          get_x_scrolls_for,
                          get_x_potions,
                          get_x_traps_for,
+                         get_x_wands,
                          )
 
 
@@ -20,19 +21,33 @@ def make_level(world, level_number, player):
                   player,
                   stairs,
                   )
+    if world == "NORMAL":
+        add_normal_items(level)
+    else:
+        add_magic_items(level)
 
     level.monsters = get_x_monsters_for(randint(4, 8), level)
-    level.items = get_x_armours(randint(0, 3))
-    level.items += get_x_weapons(randint(0, 3))
-    level.items += get_x_scrolls_for(randint(1, 4), level)
-    level.items += get_x_potions(randint(1, 4))
     level.traps = get_x_traps_for(randint(0, 2+level.number//4), level)
+
     place = partial(place_in_room, level)
     place(stairs)
     list(map(place, level.monsters))
     list(map(place, level.items))
     list(map(place, level.traps))
     return level
+
+
+def add_normal_items(level):
+    level.items = get_x_armours(randint(0, 3))
+    level.items += get_x_weapons(randint(0, 3))
+    level.items += get_x_scrolls_for(randint(1, 4), level)
+    level.items += get_x_potions(randint(0, 3))
+
+
+def add_magic_items(level):
+    level.items = get_x_scrolls_for(randint(1, 4), level)
+    level.items += get_x_potions(randint(1, 4))
+    level.items += get_x_wands(randint(0, 3+level.number//4))
 
 
 def is_alive(obj):

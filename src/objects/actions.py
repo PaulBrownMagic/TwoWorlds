@@ -6,7 +6,8 @@ from src.maps.datatypes import Tile
 from src.objects.combat import (dice_roll, does_attack_hit,
                                 thrown_damage_done_by, make_attack)
 from src.objects.datatypes import (Scroll, Armour, Weapon,
-                                   Projectile, Potion, Monster)
+                                   Projectile, Potion, Monster,
+                                   MagicWand)
 from src.gui import inventory_menu, controls_menu, message, update_screen
 
 
@@ -89,7 +90,7 @@ def drop_item(level):
     if itm is None:
         return
     if itm.item in [level.player.wearing, level.player.wielding]:
-        message("Rogue is using {}, can't drop it".format(itm.name))
+        message("Rogue is using {}, can't drop it".format(itm.item.name))
     else:
         itm = decr(itm, i, level.player.inventory)
         itm.picked_up = False
@@ -109,7 +110,7 @@ def read_scroll(level):
         itm.name.name = itm.name.realname
         return itm.function(level)
     else:
-        message("Can't read {}".format(itm.name))
+        message("Can't read {}".format(itm.item.name))
 
 
 def quaff_potion(level):
@@ -123,7 +124,7 @@ def quaff_potion(level):
         itm.name.name = itm.name.realname
         return itm.function(level)
     else:
-        message("Can't quaff {}".format(itm.name))
+        message("Can't quaff {}".format(itm.item.name))
 
 
 def is_direction_key(key):
@@ -144,10 +145,10 @@ def get_dir_action(level):
         return vim[key.text]
 
 
-def find_target(direction, level):
+def find_target(direction, dist, level):
     x, y = level.player.location
     dx, dy = movements[direction]
-    for _ in range(8):
+    for _ in range(dist):
         new_location = Location(x + dx, y + dy)
         if not is_walkable(new_location, level):
             return Location(x, y)
@@ -161,16 +162,18 @@ def find_target(direction, level):
 
 
 def throw_item(level):
-    target = find_target(get_dir_action(level), level)
+    target = find_target(get_dir_action(level), 10, level)
     message("Throw what?")
     i = get_id_action(level)
     itm = get_from_inventory(i, level.player.inventory)
-    if itm is None:
+    if itm is None or not hasattr(itm, 'item'):
         message("No such item")
         return
     if itm.item in [level.player.wearing, level.player.wielding]:
         message("Rogue is using {}, can't throw it".format(itm.name))
         return
+    if type(itm.item) == MagicWand:
+        itm.count = 1  # So decr function will do rest of disposing of it
     itm = decr(itm, i, level.player.inventory)
     if type(target) == Location:
         itm.location = target
@@ -185,6 +188,24 @@ def throw_item(level):
             message("Rogue attacks {} and misses".format(target.name))
 
 
+def zap_wand(level):
+    target = find_target(get_dir_action(level), 8, level)
+    message("Zap with what?")
+    i = get_id_action(level)
+    itm = get_from_inventory(i, level.player.inventory)
+    if itm is None or not hasattr(itm, 'item'):
+        message("No such wand")
+    if not type(itm.item) == MagicWand:
+        message("Can't zap with {}".format(itm.item.name))
+        return
+    if type(target) == Monster:
+        itm = decr(itm, i, level.player.inventory)
+        message("Rogue zaps {}".format(target.name))
+        itm.function(level, target)
+    else:
+        message("Rogue has no target")
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -194,4 +215,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "READ_SCROLL": read_scroll,
            "QUAFF_POTION": quaff_potion,
            "THROW_ITEM": throw_item,
+           "ZAP_WAND": zap_wand,
            }

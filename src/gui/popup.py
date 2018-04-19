@@ -40,13 +40,13 @@ def info_inv(level, item):
 
 def cap(name, count):
     name = str(name)
-    if count > 1:
+    if count > 1 and not (name.endswith("Wand") or name.startswith("Wand")):
         name += "s"
     return name[0].upper() + name[1:]
 
 
 def count(count):
-    return "{} ".format(count) if count > 1 else ""
+    return "[{}] ".format(count) if count > 1 else ""
 
 
 def inventory_menu(level):

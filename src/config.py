@@ -31,6 +31,7 @@ vim = {"h": "MOVE_LEFT",
        "r": "READ_SCROLL",
        "q": "QUAFF_POTION",
        "t": "THROW_ITEM",
+       "z": "ZAP_WAND",
        "i": "INVENTORY",
        "?": "VIEW_CONTROLS",
        }
