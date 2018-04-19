@@ -1,7 +1,7 @@
 import tcod
 
 from src.config import FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO
-from src.gui import update_screen, message
+from src.gui import update_screen, message, died_screen, win_screen
 from src.inputs import handle_keys
 from src.levels import make_level, update_level
 from src.maps import place_in_room
@@ -67,8 +67,10 @@ def play_game():
         elif game_state == "PLAYER_DEAD":
             break
     if game_state == "EXIT":
-        print("Thanks for playing!")
+        print("Thanks for playing! Come back soon, we have cake.")
     elif game_state == "WON":
+        win_screen(level)
         print("Congratulations, I suppose.")
     elif game_state == "PLAYER_DEAD":
+        died_screen(level)
         print("Oops, you died. Better luck next time.")

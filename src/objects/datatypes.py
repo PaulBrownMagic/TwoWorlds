@@ -94,6 +94,10 @@ class Item(Object):
     picked_up = False
 
 
+class AmuletOfYendor(Item):
+    pass
+
+
 class FunctioningItem(Item):
     function: FunctionType
 

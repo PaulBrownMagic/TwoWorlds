@@ -1,14 +1,14 @@
 import tcod
 
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.gui.config import SKULL_FILE
+from src.gui.config import SKULL_FILE, CAKE_FILE
 from src.gui.main import root
 from src.config import vim
 
 
 def menu(header, options, width):
     if len(options) > 26:
-        raise ValueError("Can't have more than 26 options in popup menu, you have {}".format(len(options)))
+        raise ValueError("Can't have more than 26 options in popup menu")
     fmt = "\n".join([header.center(width)+"\n"] +
                     options +
                     ["\n" + "--- press space to continue ---".center(width)])
@@ -76,7 +76,17 @@ def died_screen(level):
         witham = "-- with the Amulet of Yendor"
     else:
         witham = ""
-    header = "Game Over: You Died at Level: {}{}".format(level.number, witham)
+    header = "Game Over: You Died at Level: {}{}".format(level.number,
+                                                         witham).center(width)
     with open(SKULL_FILE) as skull_file:
+        # Adapted from: http://www.asciiworld.com/-Death-Co-.html
         skull_ascii = skull_file.readlines()
     menu(header, skull_ascii, width)
+
+
+def win_screen(level):
+    width = 60
+    header = "You have retrieved the Amulet of Yendor."
+    with open(CAKE_FILE) as cake_file:
+        cake_ascii = cake_file.readlines()
+    menu(header, cake_ascii, width)

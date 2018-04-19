@@ -12,6 +12,7 @@ from src.objects import (Stairs,
                          get_x_traps_for,
                          get_x_wands,
                          get_x_foods,
+                         get_amulet
                          )
 
 
@@ -29,6 +30,8 @@ def make_level(world, level_number, player):
         add_normal_items(level)
     else:
         add_magic_items(level)
+    if level.number > 25:
+        level.items.append(get_amulet())
 
     level.monsters = get_x_monsters_for(randint(4, 8), level)
     level.traps = get_x_traps_for(randint(0, 2+level.number//4), level)

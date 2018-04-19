@@ -14,7 +14,6 @@ from src.gui import (message,
                      update_screen,
                      inventory_menu,
                      controls_menu,
-                     died_screen
                      )
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
                                    Projectile, Scroll, InventoryItem,
@@ -25,6 +24,7 @@ from src.objects.actions import actions
 from src.objects.combat import attack
 from src.objects.food import foods, make_food
 from src.objects.monsters import monsters_for, make_monster
+from src.objects.amulet import is_amulet
 
 # flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
 # V: drain hp, X: drain xp, S:stationairy, L: lure player
@@ -35,7 +35,6 @@ move_ticker = 1
 def run_move_logic(level, user_input):
     game_state = None
     if level.player.state == "DEAD":
-        died_screen(level)
         return "PLAYER_DEAD"
     if user_input in movements:
         tick_move(level)
@@ -168,6 +167,11 @@ def triggertrap(level):
 
 def pickup(player, item):
     if same_location(player.location, item.location):
+        if is_amulet(item):
+            player.has_amulet_of_yendor = True
+            message("Rogue picked up The Amulet Of Yendor")
+            return
+        # See if existing location
         existing = [l for l, i in player.inventory.items()
                     if i is not None and i.item.name == item.name]
         for e in existing:
@@ -176,6 +180,7 @@ def pickup(player, item):
                 item.picked_up = True
                 message("Rogue picked up {} ({})".format(item.name, e))
                 return
+        # Or add to new slot
         spaces = [l for l, i in player.inventory.items() if i is None]
         overburdened = sum([i.weight for i in player.inventory.values()
                             if i is not None]) >= player.inventory_limit
@@ -183,6 +188,8 @@ def pickup(player, item):
             player.inventory[spaces[0]] = make_inventory_item(item)
             item.picked_up = True
             item.found = False
+            if is_amulet(item):
+                player.has_amulet_of_yendor = True
             message("Rogue picked up {} ({})".format(item.name, spaces[0]))
         else:
             message("Rogue's inventory is full")
