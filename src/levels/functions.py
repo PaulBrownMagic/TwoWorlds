@@ -30,7 +30,7 @@ def make_level(world, level_number, player):
         add_normal_items(level)
     else:
         add_magic_items(level)
-    if level.number > 25:
+    if level.number > 25 and not level.player.has_amulet_of_yendor:
         level.items.append(get_amulet())
 
     level.monsters = get_x_monsters_for(randint(4, 8), level)

@@ -80,7 +80,7 @@ Name = WandName
 
 wands = [
     dict(name=Name("Lightning"), p=9, f=lightning),
-    # dict(name=Name("Hiding"), p=5, f=hide),
+    dict(name=Name("Hiding"), p=5, f=hide),
     dict(name=Name("Polymorph"), p=12, f=polymorph),
     dict(name=Name("Magic Missile"), p=10, f=magic_missile),
     dict(name=Name("Vampiric Regeneration"), p=5, f=vampiric),
@@ -88,7 +88,7 @@ wands = [
     dict(name=Name("Nothing"), p=1, f=nothing),
     dict(name=Name("Teleport Away"), p=6, f=teleport_away),
     dict(name=Name("Summoning"), p=6, f=create_monster),
-    # dict(name=Name("Cancellation"), p=5, f=cancellation),
+    dict(name=Name("Cancellation"), p=5, f=cancellation),
 ]
 
 

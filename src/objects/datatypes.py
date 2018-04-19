@@ -149,7 +149,7 @@ class Projectile(Weapon):
     def __init__(self, name, char, colour, attack, thrown):
         super().__init__(name, char, colour, attack)
         self.thrown = thrown  # attack when thrown
-        self.weight = 0.1
+        self.weight = 0.01
 
 
 class Monster(MovingObject):
@@ -205,7 +205,7 @@ class MagicWand(FunctioningItem):
 
     def __init__(self, name, char, colour, function, count):
         super().__init__(name, char, colour, function)
-        self.weight = 0.1
+        self.weight = 0.001
         self.count = count
 
 

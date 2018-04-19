@@ -186,7 +186,7 @@ def throw_item(level):
         if does_attack_hit(level.player, target, level.number):
             make_attack(level.player, target,
                         thrown_damage_done_by(itm, level.player))
-            
+
         else:
             message("Rogue attacks {} and misses".format(target.name))
 
@@ -204,6 +204,8 @@ def zap_wand(level):
     if type(target) == Monster:
         itm = decr(itm, i, level.player.inventory)
         message("Rogue zaps {}".format(target.name))
+        if target.state in ["SLEEPING", "SNOOZING"]:
+            target.state = "ACTIVE"
         itm.function(level, target)
     else:
         message("Rogue has no target")
