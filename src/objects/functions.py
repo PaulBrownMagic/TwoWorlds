@@ -26,8 +26,8 @@ from src.objects.food import foods, make_food
 from src.objects.monsters import monsters_for, make_monster
 from src.objects.amulet import is_amulet
 
-# flags: A: armour drain, M:mean, F:flying, H: hidden, R: regen hp,
-# V: drain hp, X: drain xp, S:stationairy, L: lure player
+# flags: A:armour drain, M:mean, F:flying, H:hidden, R:regen hp,
+# V:drain hp, X:drain xp, S:stationairy, L:lure player
 
 move_ticker = 1
 
@@ -87,7 +87,18 @@ def getting_hungry(player):
     return True  # Move
 
 
+def incr_hp(monster):
+    monster.hp += randint(1, 3)
+    if monster.hp > monster.max_hp:
+        monster.hp = monster.max_hp
+
+
+def monster_regens(monster):
+    return "R" in monster.flags
+
+
 def do_hp_regen(level, mt):
+    list(map(incr_hp, filter(monster_regens(level.monsters))))
     if level.number < 8:
         return mt % 21 - level.number * 2 == 0
     else:
@@ -239,6 +250,20 @@ def monster_move(level, monster):
         x, y = (next_tile[0] - monster.location.x,
                 next_tile[1] - monster.location.y)
         _move(monster, x, y, level, stationary)
+
+    in_fov = tcod.map_is_in_fov(level.map_grid, monster.location.x,
+                                monster.location.y)
+    close = distance_to(monster.location, level.player.location) > 2
+    if "L" in monster.flags and close and in_fov:
+        update_screen(level)
+        astar = tcod.path_new_using_map(level.map_grid, 1.95)
+        tcod.path_compute(astar,
+                          level.player.location.x, level.player.location.y,
+                          monster.location.x, monster.location.y)
+        next_tile = tcod.path_get(astar, 0)
+        x, y = (next_tile[0] - level.player.location.x,
+                next_tile[1] - level.player.location.y)
+        _move(level.player, x, y, level)
 
 
 def update_monster_state(level, monster):

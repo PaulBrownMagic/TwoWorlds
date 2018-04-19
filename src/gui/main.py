@@ -55,7 +55,8 @@ def draw_map(mp, world):
 
 def draw_in_map(mp, item):
     in_fov = tcod.map_is_in_fov(mp, item.location.x, item.location.y)
-    if in_fov or item.found:
+    if ((in_fov or item.found) and not (hasattr(item, "flags") and
+                                        "H" in item.flags)):
         _draw(item)
 
 

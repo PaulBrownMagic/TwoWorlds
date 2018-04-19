@@ -40,7 +40,7 @@ p = dict(name="Pegasus", levels=(15, 24), carry=50, flags="FR", xp=120, ac=2,
          hp="8d8", dmg="4d4", state=SN)
 q = dict(name="Quagga", levels=(9, 18), carry=0, flags="M", xp=32, ac=2,
          hp="3d8", dmg="1d4", state=SN)
-r = dict(name="Rå", levels=(4, 13), carry=80, flags="HR", xp=35, ac=8,
+r = dict(name="Ra", levels=(4, 13), carry=80, flags="HR", xp=35, ac=8,
          hp="2d8", dmg="1d6", state=SL)
 s = dict(name="Siren", levels=(6, 15), carry=0, flags="SL", xp=10, ac=8,
          hp="3d8", dmg="2d4", state=SL)
@@ -48,7 +48,7 @@ t = dict(name="Troll", levels=(12, 21), carry=15, flags="RM", xp=120, ac=4,
          hp="6d8", dmg="2d6", state=A)
 u = dict(name="Urvile", levels=(16, 25), carry=0, flags="M", xp=190, ac=-1,
          hp="7d8", dmg="4d6", state=SN)
-v = dict(name="Vampire", levels=(20, 999), carry=20, flags="VRM", xp=350,
+v = dict(name="Vampire", levels=(20, 999), carry=20, flags="VM", xp=350,
          ac=1, hp="8d8", dmg="1d10", state=SN)
 w = dict(name="Wraith", levels=(13, 22), carry=0, flags="X", xp=55, ac=4,
          hp="5d8", dmg="1d6", state=A)

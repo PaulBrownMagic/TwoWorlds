@@ -3,16 +3,51 @@ from random import randint
 import tcod
 
 from src.gui import message
-from src.objects.datatypes import Player, Armour, Weapon, Projectile, Scroll
+from src.objects.datatypes import (Player,
+                                   Armour,
+                                   Weapon,
+                                   Projectile,
+                                   Scroll,
+                                   Monster)
 
 
 def attack(x, y, level):
     if type(x) == type(y):
         return
     if does_attack_hit(x, y, level.number):
-        make_attack(x, y, damage_done_by(x))
+        dmg = damage_done_by(x)
+        if type(x) == Monster:
+            if "A" in x.flags:
+                armour_drain(x, y)
+            if "V" in x.flags:
+                hp_drain(x, dmg)
+            if "X" in x.flags:
+                xp_drain(x, y)
+        if type(y) == Monster:
+            if "H" in y.flags:
+                y.flags = y.flags.replace("H", "")
+                print(y.flags)
+        make_attack(x, y, dmg)
     else:
         message("{} attacks {} and misses".format(x.name, y.name))
+
+
+def armour_drain(monster, player):
+    if randint(1, 2) == 1:
+        player.wearing.defence += 1
+        message("{} rusts your armour".format(monster.name))
+    else:
+        message("{} attacks Rogue and misses".format(monster.name))
+
+
+def hp_drain(monster, dmg):
+    monster.hp += dmg//2
+    if monster.hp > monster.max_hp:
+        monster.hp = monster.max_hp
+
+
+def xp_drain(monster, player):
+    player.xp -= 2*2**player.xp_level
 
 
 def make_attack(x, y, dmg):
