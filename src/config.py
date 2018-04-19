@@ -2,7 +2,7 @@ import tcod
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 52
-TITLE = "Rogue: Beyond The Veil"
+TITLE = "Rogue: Through The Veil"
 
 FOV_ALGO = tcod.FOV_BASIC
 FOV_LIGHT_WALLS = True
@@ -34,6 +34,7 @@ vim = {"h": "MOVE_LEFT",
        "z": "ZAP_WAND",
        "i": "INVENTORY",
        "e": "EAT",
+       ",": "PICK_UP_ITEM",
        "?": "VIEW_CONTROLS",
        }
 

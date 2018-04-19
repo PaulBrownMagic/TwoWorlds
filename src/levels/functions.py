@@ -45,10 +45,10 @@ def make_level(world, level_number, player):
 
 
 def add_normal_items(level):
-    level.items += get_x_armours(randint(0, 3))
-    level.items += get_x_weapons(randint(0, 3))
-    level.items += get_x_scrolls_for(randint(1, 4), level)
-    level.items += get_x_potions(randint(0, 3))
+    level.items += get_x_armours(randint(0, 2))
+    level.items += get_x_weapons(randint(0, 2))
+    level.items += get_x_scrolls_for(randint(1, 3), level)
+    level.items += get_x_potions(randint(0, 2))
 
 
 def add_magic_items(level):

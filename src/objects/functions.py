@@ -1,3 +1,4 @@
+from functools import partial
 from random import randint, choice
 
 import tcod
@@ -17,14 +18,13 @@ from src.gui import (message,
                      )
 from src.objects.datatypes import (Player, Armour, Weapon, Potion,
                                    Projectile, Scroll, InventoryItem,
-                                   MagicWand, Food, Fruit)
+                                   MagicWand, Food, Fruit, Monster)
 from src.objects.weapons import mace, make_weapon, shortbow, arrow
 from src.objects.armour import ringmail, make_armour, armours
-from src.objects.actions import actions
+from src.objects.actions import actions, autopickup, is_scare_monster
 from src.objects.combat import attack
 from src.objects.food import foods, make_food
 from src.objects.monsters import monsters_for, make_monster
-from src.objects.amulet import is_amulet
 
 # flags: A:armour drain, M:mean, F:flying, H:hidden, R:regen hp,
 # V:drain hp, X:drain xp, S:stationairy, L:lure player
@@ -39,9 +39,9 @@ def run_move_logic(level, user_input):
     if user_input in movements:
         if getting_hungry(level.player):
             x, y = movements[user_input]
-            _move(level.player, x, y, level)
+            if _move(level.player, x, y, level) and (x, y) != (0, 0):
+                autopickup(level)
         find_stairs(level)
-        autopickup(level)
         game_state = triggertrap(level)
     elif user_input in actions:
         action_state = actions[user_input](level)
@@ -140,19 +140,23 @@ def is_confused(obj):
 
 def _move(obj, x, y, level, stationary=False):
     if type(obj) == Player and player_sleeping(level):
-        return
+        return False
     if is_confused(obj):
         x, y = movements[choice(list(movements))]
     new_location = Location(obj.location.x + x, obj.location.y + y)
     blocked = is_blocked(new_location, level)
     walkable = is_walkable(new_location, level)
+    scared = monsters_are_scared(level)
     if walkable and not blocked and not stationary:
         obj.location = new_location
-    if walkable and blocked:
+        return True
+    elif walkable and blocked and not (type(obj) == Monster and
+                                       scared):
         monsters = filter(lambda x: x.location == new_location and x.blocks,
                           level.monsters + [level.player])
         for monster in monsters:
             attack(obj, monster, level)
+        return False
 
 
 def find_stairs(level):
@@ -162,68 +166,12 @@ def find_stairs(level):
         level.stairs.found = True
 
 
-def autopickup(level):
-    itms = [item for item in level.items
-            if same_location(level.player.location, item.location)]
-    for itm in itms:
-        pickup(level.player, itm)
-
-
 def triggertrap(level):
     traps = [trap for trap in level.traps
              if same_location(level.player.location, trap.location)]
     for trap in traps:
         trap.found = True
         return trap.function(level)
-
-
-def pickup(player, item):
-    if same_location(player.location, item.location):
-        if is_amulet(item):
-            player.has_amulet_of_yendor = True
-            message("Rogue picked up The Amulet Of Yendor")
-            return
-        # See if existing location
-        existing = [l for l, i in player.inventory.items()
-                    if i is not None and i.item.name == item.name]
-        for e in existing:
-            if not player.inventory[e].full:
-                more_items(item, player.inventory, e)
-                item.picked_up = True
-                message("Rogue picked up {} ({})".format(item.name, e))
-                return
-        # Or add to new slot
-        spaces = [l for l, i in player.inventory.items() if i is None]
-        overburdened = sum([i.weight for i in player.inventory.values()
-                            if i is not None]) >= player.inventory_limit
-        if len(spaces) > 0 and not overburdened:
-            player.inventory[spaces[0]] = make_inventory_item(item)
-            item.picked_up = True
-            item.found = False
-            if is_amulet(item):
-                player.has_amulet_of_yendor = True
-            message("Rogue picked up {} ({})".format(item.name, spaces[0]))
-        else:
-            message("Rogue's inventory is full")
-
-
-def more_items(item, inventory, slot):
-    if type(item) == MagicWand:
-        incr = randint(2, 10)
-    else:
-        incr = 1
-    inventory[slot].count += incr
-
-
-def make_inventory_item(itm):
-    if type(itm) in [Potion, Scroll, Food, Fruit]:
-        return InventoryItem(itm, max_count=26)
-    elif type(itm) == Projectile:
-        return InventoryItem(itm, count=randint(1, 15), max_count=50)
-    elif type(itm) == MagicWand:
-        return InventoryItem(itm, count=itm.count, max_count=26)
-    else:
-        return InventoryItem(itm)
 
 
 def is_flying_targeting(monster):
@@ -275,6 +223,19 @@ def update_monster_state(level, monster):
         monster.state = "TARGETING"
     elif in_fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
         monster.state = "TARGETING"
+
+
+def is_functioning(item):
+    return hasattr(item, "function")
+
+
+def monsters_are_scared(level):
+    on_tile = partial(same_location, level.player.location)
+    itms = list(filter(is_scare_monster,
+                       filter(is_functioning,
+                              [item for item in level.items
+                               if on_tile(item.location)])))
+    return True if len(itms) > 0 else False
 
 
 def make_player():

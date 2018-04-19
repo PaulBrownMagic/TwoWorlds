@@ -5,8 +5,9 @@ from random import choice
 
 def place_in_room(level, obj):
     mp = level.map_grid
-    occupied_locations = (itm.location
-                          for itm in level.items + level.monsters if hasattr(itm, "location"))
+    occupied_locations = [itm.location
+                          for itm in level.items + level.monsters
+                          if hasattr(itm, "location")]
     tile = choice([tile for rm in mp.rooms
                    for tile in chain(*rm.tiles)
                    if tile.location not in occupied_locations])

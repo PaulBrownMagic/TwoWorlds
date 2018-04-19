@@ -106,7 +106,7 @@ class FunctioningItem(Item):
 
 
 class Scroll(FunctioningItem):
-    pass
+    used_up: bool = False
 
 
 class Potion(FunctioningItem):
@@ -130,6 +130,7 @@ class Fruit(Food):
 
 class Armour(Item):
     defence: int
+    protected: bool = False
 
     def __init__(self, name, char, colour, defence):
         super().__init__(name, char, colour)

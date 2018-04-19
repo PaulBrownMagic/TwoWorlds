@@ -7,8 +7,9 @@ from src.objects.combat import (dice_roll, does_attack_hit,
                                 thrown_damage_done_by, make_attack)
 from src.objects.datatypes import (Scroll, Armour, Weapon,
                                    Projectile, Potion, Monster,
-                                   MagicWand, Food, Fruit)
+                                   MagicWand, Food, Fruit, InventoryItem)
 from src.gui import inventory_menu, controls_menu, message, update_screen
+from src.objects.amulet import is_amulet
 
 
 def get_id_action(level):
@@ -226,6 +227,75 @@ def eat(level):
         itm.function(level)
 
 
+def autopickup(level):
+    itms = [item for item in level.items
+            if same_location(level.player.location, item.location)]
+    for itm in itms:
+        pickup(level.player, itm)
+
+
+def pickup(player, item):
+    if same_location(player.location, item.location):
+        if is_amulet(item):
+            player.has_amulet_of_yendor = True
+            message("Rogue picked up The Amulet Of Yendor")
+            return
+        if is_scare_monster(item):
+            if item.used_up:
+                message("The scroll crumbles away to nothing")
+                return
+            else:
+                item.used_up = True
+        # See if existing location
+        existing = [l for l, i in player.inventory.items()
+                    if i is not None and i.item.name == item.name]
+        for e in existing:
+            if not player.inventory[e].full:
+                more_items(item, player.inventory, e)
+                item.picked_up = True
+                message("Rogue picked up {} ({})".format(item.name, e))
+                return
+        # Or add to new slot
+        spaces = [l for l, i in player.inventory.items() if i is None]
+        overburdened = sum([i.weight for i in player.inventory.values()
+                            if i is not None]) >= player.inventory_limit
+        if len(spaces) > 0 and not overburdened:
+            player.inventory[spaces[0]] = make_inventory_item(item)
+            item.picked_up = True
+            item.found = False
+            if is_amulet(item):
+                player.has_amulet_of_yendor = True
+            message("Rogue picked up {} ({})".format(item.name, spaces[0]))
+        else:
+            message("Rogue's inventory is full")
+
+
+def more_items(item, inventory, slot):
+    if type(item) == MagicWand:
+        incr = randint(2, 10)
+    else:
+        incr = 1
+    inventory[slot].count += incr
+
+
+def make_inventory_item(itm):
+    if type(itm) in [Potion, Scroll, Food, Fruit]:
+        return InventoryItem(itm, max_count=26)
+    elif type(itm) == Projectile:
+        return InventoryItem(itm, count=randint(1, 15), max_count=50)
+    elif type(itm) == MagicWand:
+        return InventoryItem(itm, count=itm.count, max_count=26)
+    else:
+        return InventoryItem(itm)
+
+
+def is_scare_monster(item):
+    if hasattr(item.name, "realname"):
+        return item.name.realname == "a Scroll of Scare Monster"
+    else:
+        return False
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -237,4 +307,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "THROW_ITEM": throw_item,
            "ZAP_WAND": zap_wand,
            "EAT": eat,
+           "PICK_UP_ITEM": autopickup,
            }

@@ -33,7 +33,7 @@ def attack(x, y, level):
 
 
 def armour_drain(monster, player):
-    if randint(1, 2) == 1:
+    if randint(1, 2) == 1 and not player.wearing.protected:
         player.wearing.defence += 1
         message("{} rusts your armour".format(monster.name))
     else:
