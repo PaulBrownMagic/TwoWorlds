@@ -69,7 +69,7 @@ def play_game():
     if game_state == "EXIT":
         print("Thanks for playing! Come back soon, we have cake.")
     elif game_state == "WON":
-        win_screen(level)
+        win_screen()
         print("Congratulations, I suppose.")
     elif game_state == "PLAYER_DEAD":
         died_screen(level)

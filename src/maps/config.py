@@ -3,8 +3,8 @@ from tcod.color import Color
 from src.config import SCREEN_WIDTH
 
 
-MAP_WIDTH = SCREEN_WIDTH
-MAP_HEIGHT = 45
+MAP_WIDTH = SCREEN_WIDTH - SCREEN_WIDTH//4
+MAP_HEIGHT = 44
 
 MIN_ROOM_W = 4
 MAX_ROOM_W = 14

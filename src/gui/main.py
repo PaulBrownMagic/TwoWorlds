@@ -6,7 +6,7 @@ import tcod
 
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE
 from src.gui.config import FONT, COLOURS
-from src.gui.panels import panel, update_panel
+from src.gui.panels import panel, update_panel, message
 from src.maps.config import MAP_HEIGHT
 from src.maps import same_location
 
@@ -149,7 +149,7 @@ def update_screen(level):
     tcod.console_blit(src=con, x=0, y=0,
                       w=SCREEN_WIDTH, h=SCREEN_HEIGHT,
                       dst=root,
-                      xdst=0, ydst=0)
+                      xdst=SCREEN_WIDTH//8, ydst=0)
     tcod.console_blit(src=panel, x=0, y=0,
                       w=SCREEN_WIDTH,
                       h=SCREEN_HEIGHT-MAP_HEIGHT,

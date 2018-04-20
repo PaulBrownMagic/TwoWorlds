@@ -6,6 +6,7 @@ ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
 FONT = os.path.join(ASSETS_DIR, "dejavu10x10_gs_tc.png")
 SKULL_FILE = os.path.join(ASSETS_DIR, "ascii_skull.txt")
 CAKE_FILE = os.path.join(ASSETS_DIR, "ascii_cake.txt")
+HUNGRY_FILE = os.path.join(ASSETS_DIR, "ascii_cake2.txt")
 
 N_DARK_WALL = Color(31, 31, 16)
 N_LIT_WALL = Color(130, 103, 23)

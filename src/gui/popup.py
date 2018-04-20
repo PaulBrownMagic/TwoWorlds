@@ -1,7 +1,7 @@
 import tcod
 
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.gui.config import SKULL_FILE, CAKE_FILE
+from src.gui.config import SKULL_FILE, CAKE_FILE, HUNGRY_FILE
 from src.gui.main import root
 from src.config import vim
 
@@ -59,7 +59,7 @@ def inventory_menu(level):
                       cap(i.item.name, i.count),
                       info_inv(level, i.item))
                for l, i in inv.items() if i is not None]
-    menu(header, options, 42)
+    menu(header, options, 52)
 
 
 def controls_menu(_):
@@ -84,9 +84,15 @@ def died_screen(level):
     menu(header, skull_ascii, width)
 
 
-def win_screen(level):
+def win_screen():
     width = 60
     header = "You have retrieved the Amulet of Yendor."
     with open(CAKE_FILE) as cake_file:
         cake_ascii = cake_file.readlines()
     menu(header, cake_ascii, width)
+
+
+def hungry_popup(msg):
+    with open(HUNGRY_FILE) as hungry_file:
+        hungry_ascii = hungry_file.readlines()
+    menu(msg, hungry_ascii, 50)

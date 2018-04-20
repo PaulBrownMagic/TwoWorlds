@@ -13,7 +13,12 @@ from src.objects.combat import (dice_roll, does_attack_hit,
 from src.objects.datatypes import (Scroll, Armour, Weapon, Player,
                                    Projectile, Potion, Monster,
                                    MagicWand, Food, Fruit, InventoryItem)
-from src.gui import inventory_menu, controls_menu, message, update_screen
+from src.gui import (inventory_menu,
+                     controls_menu,
+                     message,
+                     update_screen,
+                     hungry_popup,
+                     )
 from src.objects.amulet import is_amulet
 from src.objects.combat import attack
 
@@ -203,7 +208,7 @@ def zap_wand(level):
     message("Zap with what?")
     i = get_id_action(level)
     itm = get_from_inventory(i, level.player.inventory)
-    if itm is None or not hasattr(itm, 'item'):
+    if itm is None or not hasattr(itm, 'item') or itm.item is None:
         message("No such wand")
     if not type(itm.item) == MagicWand:
         message("Can't zap with {}".format(itm.item.name))
@@ -318,11 +323,11 @@ def monsters_are_scared(level):
 def getting_hungry(player):
     player.hunger += 1
     if player.hunger == HUNGRY:
-        message("Rogue is hungry")
+        hungry_popup("Rogue is hungry")
     if player.hunger == HUNGRY_WEAK:
-        message("Rogue is weak")
+        hungry_popup("Rogue is weak")
     if player.hunger in HUNGRY_FEINT:
-        message("Rogue is faint")
+        hungry_popup("Rogue is faint")
         return False  # Can't move
     if player.hunger > HUNGRY_DIE:
         player.state = "DEAD"

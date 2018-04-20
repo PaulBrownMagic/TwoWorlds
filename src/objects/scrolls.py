@@ -80,12 +80,18 @@ def teleport(level):
 def enchant_weapon(level):
     name = level.player.wielding.name
     message("Rogue's {} glows blue for a second".format(name))
+    """
     atck = level.player.wielding.attack
     dice, sides = map(int, atck.split('d'))
     total = dice * sides
     dice += 1
     sides = ceil(total/dice)
     level.player.wielding.attach = "{}d{}".format(dice, sides)
+    """
+    ugr = choice([level.player.wielding.attack_mod,
+                  level.player.wielding.dexterity_mod])
+    upr += 1
+
 
 
 def create_monster(level):

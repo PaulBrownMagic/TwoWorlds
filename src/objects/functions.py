@@ -73,9 +73,9 @@ def tick_move(level):
         for mon in filter(lambda m: "R" in m.flags, level.monsters):
             regen_health(mon, level.number)
         regen_health(level.player, level.number)
-    if move_ticker % 50 == 0:
+    if move_ticker % 100 == 0:
         add_monster(level)
-    if move_ticker % 20 == 0 and move_ticker % 50 == 0:
+    if move_ticker % 20 == 0 and move_ticker % 100 == 0:
         move_ticker = 1
 
 
@@ -175,13 +175,12 @@ def update_monster_state(level, monster):
                                   level.map_grid)
     if monster.hp <= 0:
         monster.state = "DEAD"
-    elif in_fov and monster.state == "SNOOZING" and randint(1, 10) < 10:
+    elif in_fov and monster.state == "SNOOZING" and randint(1, 10) < 9:
         monster.state = "ACTIVE"
     elif (in_fov or in_player_room) and "M" in monster.flags and randint(1, 10) < 10:
         monster.state = "TARGETING"
     elif in_fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
         monster.state = "TARGETING"
-
 
 
 def monster_drop(monster, level):
@@ -203,17 +202,14 @@ def make_player():
     sb = make_weapon(shortbow)
     sb.attack_mod = 1
     sb.dexterity_mod = 1
-    sb.realname = "[+1] [+1] {}".format(sb.name)
     sb.name = sb.realname
     ar = make_weapon(arrow)
     ar.attack_mod = 0
     ar.dexterity_mod = 0
-    ar.realname = "[+0] [+0] {}".format(ar.name)
     ar.name = ar.realname
     mc = make_weapon(mace)
     mc.attack_mod = 2
     mc.dexterity_mod = 2
-    mc.realname = "[+2] [+2] {}".format(mc.name)
     mc.name = mc.realname
     player = Player(weapon=mc,
                     armour=make_armour(ringmail),
