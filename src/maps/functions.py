@@ -10,7 +10,8 @@ def place_in_room(level, obj):
                           if hasattr(itm, "location")]
     tile = choice([tile for rm in mp.rooms
                    for tile in chain(*rm.tiles)
-                   if tile.location not in occupied_locations])
+                   if tile.location not in occupied_locations
+                   and tile.walkable])
     obj.location = tile.location
 
 

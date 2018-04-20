@@ -1,12 +1,13 @@
 from collections import namedtuple
-from itertools import chain
-from random import choice, randint, randrange
+from itertools import chain, permutations
+from random import choice, randint, randrange, shuffle
 
 import networkx as nx
 from tcod.map import Map as TcodMap
 
 from src.maps.config import MAP_WIDTH, MAP_HEIGHT
 from src.maps.config import MIN_ROOM_W, MAX_ROOM_W, MIN_ROOM_H, MAX_ROOM_H
+from src.maps.mazes import get_maze
 
 Location = namedtuple('Location', ['x', 'y'])
 
@@ -54,7 +55,7 @@ class Room:
         self.origin = origin
         self.width = width
         self.height = height
-        self.tiles = [[Tile(Location(x, y), walkable=True)
+        self.tiles = [[Tile(Location(x, y), walkable=True, transparent=True)
                        for x in range(x1, x2)]
                       for y in range(y1, y2)]
         self.doors = dict(TOP=None,
@@ -142,6 +143,10 @@ class Map(TcodMap):
                       for y in range(MAP_HEIGHT)]
         self.gen_rooms()
         self.gen_passages()
+        self.remove_room(0)
+        self.make_maze()
+        self.make_rooms()
+        self.make_passages()
         self.update_c_map()
 
     def update_c_map(self):
@@ -155,11 +160,6 @@ class Map(TcodMap):
         """Place the rooms, one in each of the sections"""
         self.rooms = [self._place_room(self._bound_to_coords(bound))
                       for bound in self._room_bounds]
-        for t in chain(*chain(*[room.tiles for room in self.rooms])):
-            tile = self.tiles[t.location.y][t.location.x]
-            assert(tile.location == t.location)
-            tile.walkable = True
-            tile.transparent = True
 
     def gen_passages(self):
         """Use a spanning tree to connect the rooms,
@@ -173,11 +173,19 @@ class Map(TcodMap):
         extras = set([choice(excluded) for _ in range(randint(1, 5))])
         self.passages += [self._connect(c) for c in extras]
 
+    def make_passages(self):
         for pt in chain(*[p.tiles for p in self.passages]):
             tile = self.tiles[pt.location.y][pt.location.x]
             assert(tile.location == pt.location)
             tile.walkable = True
             tile.transparent = False
+
+    def make_rooms(self):
+        for t in chain(*chain(*[room.tiles for room in self.rooms])):
+            tile = self.tiles[t.location.y][t.location.x]
+            assert(tile.location == t.location)
+            tile.walkable = t.walkable
+            tile.transparent = t.transparent
 
     def _bound_to_coords(self, bound):
         """Given a bounding region, return the coords
@@ -249,3 +257,69 @@ class Map(TcodMap):
             door = choice([r[0] for r in room.tiles][1:-1])
             room.doors[side] = door
             return door
+
+    def remove_room(self, chance):
+        rooms_with_two_doors = [rm for rm in self.rooms
+                                if len([d for d in rm.doors.values()
+                                        if d is not None]) == 2]
+
+        if len(rooms_with_two_doors) > 0 and randint(1, 10) < 4 - chance:
+            self._remove_room(choice(rooms_with_two_doors), chance)
+
+    def _remove_room(self, rm, chance):
+        if rm.doors["LEFT"] is not None:
+            direction = "LR"
+            d1 = rm.doors["LEFT"]
+            d1.location = Location(d1.location.x - 1, d1.location.y)
+        elif rm.doors["TOP"] is not None:
+            direction = "TB"
+            d1 = rm.doors["TOP"]
+            d1.location = Location(d1.location.x, d1.location.y - 1)
+        elif rm.doors["RIGHT"] is not None:
+            direction = "TB"
+            d1 = rm.doors["RIGHT"]
+            d1.location = Location(d1.location.x + 1, d1.location.y)
+        side, d2 = [(s, d) for s, d in rm.doors.items()
+                    if d != d1 and d is not None][0]
+        if side == "TOP":
+            d2.location = Location(d2.location.x, d2.location.y - 1)
+        elif side == "RIGHT":
+            d2.location = Location(d2.location.x + 1, d2.location.y)
+        elif side == "BOTTOM":
+            d2.location = Location(d2.location.x, d2.location.y + 1)
+        self.passages.append(Passage(d1.location, d2.location, direction))
+        self.rooms.remove(rm)
+        self.remove_room(chance + 1)
+
+    def make_maze(self):
+        potential_rooms = [rm for rm in self.rooms
+                           if rm.width > 8 and
+                           rm.height > 6
+                           ]
+        if len(potential_rooms) > 0 and randint(0, 10) < 3:
+            self._make_maze(choice(potential_rooms))
+
+    def _make_maze(self, rm):
+        maze = get_maze(rm.width+1, rm.height+1)
+        if rm.doors["TOP"] is not None:
+            loc = rm.doors["TOP"].location
+            x = loc.x - rm.origin.x
+            maze[0][x] = 1
+        if rm.doors["BOTTOM"] is not None:
+            loc = rm.doors["BOTTOM"].location
+            x = loc.x - rm.origin.x
+            maze[-1][x] = 1
+        if rm.doors["LEFT"] is not None:
+            loc = rm.doors["LEFT"].location
+            y = loc.y - rm.origin.y
+            maze[y][0] = 1
+        if rm.doors["RIGHT"] is not None:
+            loc = rm.doors["RIGHT"].location
+            y = loc.y - rm.origin.y
+            maze[y][-1] = 1
+
+        for mrow, trow in zip(maze, rm.tiles):
+            for m, tile in zip(mrow, trow):
+                if m == 0:
+                    tile.walkable = False
+                tile.transparent = False
