@@ -137,18 +137,34 @@ class Armour(Item):
         self.defence = defence
 
 
-class Weapon(Item):
-    attack: int
+def pos_neg(num):
+    if num >= 0:
+        return "+{}".format(num)
+    else:
+        return str(num)
 
-    def __init__(self, name, char, colour, attack):
+
+class Weapon(Item):
+    attack: str
+    attack_mod: int
+    dexterity_mod: int
+
+    def __init__(self, name, char, colour, attack, attack_mod, dexterity_mod):
         super().__init__(name, char, colour)
         self.attack = attack
+        self.attack_mod = attack_mod
+        self.dexterity_mod = dexterity_mod
+        self.realname = "[{}] [{}] {}".format(pos_neg(self.attack_mod),
+                                              pos_neg(self.dexterity_mod),
+                                              self.name)
+
 
 
 class Projectile(Weapon):
 
-    def __init__(self, name, char, colour, attack, thrown):
-        super().__init__(name, char, colour, attack)
+    def __init__(self, name, char, colour, attack, thrown,
+                 attack_mod, dexterity_mod):
+        super().__init__(name, char, colour, attack, attack_mod, dexterity_mod)
         self.thrown = thrown  # attack when thrown
         self.weight = 0.01
 
@@ -159,11 +175,12 @@ class Monster(MovingObject):
     flags: str
 
     def __init__(self, name, char, colour,
-                 state, attack, armour, hp, xp, flags):
+                 state, attack, armour, hp, xp, flags, carry):
         super().__init__(name, char, colour, state, hp, xp)
         self.attack = attack
         self.armour = armour
         self.flags = flags
+        self.carry = carry
 
 
 class Player(MovingObject):

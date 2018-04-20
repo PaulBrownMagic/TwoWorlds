@@ -82,6 +82,7 @@ def make_monster(m):
                    hp=dice_roll(m['hp']),
                    xp=m['xp'],
                    flags=m['flags'],
+                   carry=m['carry'],
                    )
 
 

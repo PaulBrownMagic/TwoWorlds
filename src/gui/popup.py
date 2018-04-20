@@ -47,7 +47,7 @@ def cap(name, count):
 
 
 def count(count):
-    return "[{}] ".format(count) if count > 1 else ""
+    return "({}*) ".format(count) if count > 1 else ""
 
 
 def inventory_menu(level):

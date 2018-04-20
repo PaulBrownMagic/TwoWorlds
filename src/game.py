@@ -14,7 +14,7 @@ def play_level(level):
     tcod.map_compute_fov(level.map_grid,
                          level.player.location.x,
                          level.player.location.y,
-                         radius=FOV_RADIUS,
+                         radius=FOV_RADIUS - level.number//2,
                          light_walls=FOV_LIGHT_WALLS,
                          algo=FOV_ALGO)
     update_screen(level)

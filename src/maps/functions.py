@@ -18,6 +18,15 @@ def same_location(l1, l2):
     return l1 == l2
 
 
+def in_same_room(l1, l2, mp):
+    for room in mp.rooms:
+        tiles = chain(*room.tiles)
+        locations = [tile.location for tile in tiles]
+        if l1 in locations and l2 in locations:
+            return True
+    return False
+
+
 def is_walkable(location, level):
     if level.map_grid.walkable[location.y][location.x]:
         return True

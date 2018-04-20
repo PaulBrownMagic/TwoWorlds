@@ -6,7 +6,7 @@ TITLE = "Rogue: Through The Veil"
 
 FOV_ALGO = tcod.FOV_BASIC
 FOV_LIGHT_WALLS = True
-FOV_RADIUS = 16
+FOV_RADIUS = 20
 
 arrows = {15: "MOVE_LEFT",
           16: "MOVE_RIGHT",

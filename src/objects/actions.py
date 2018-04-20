@@ -1,4 +1,5 @@
 from functools import partial
+from random import choice, randint
 
 import tcod
 
@@ -189,7 +190,7 @@ def throw_item(level):
         itm.picked_up = False
         message("Rogue threw {}".format(itm.name))
     elif type(target) == Monster:
-        if does_attack_hit(level.player, target, level.number):
+        if does_attack_hit(level.player, target, level.number, itm):
             make_attack(level.player, target,
                         thrown_damage_done_by(itm, level.player))
 

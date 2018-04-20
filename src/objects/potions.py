@@ -16,7 +16,8 @@ def confuse(level):
 
 
 def hallucinate(level):
-    pass
+    message("Whoah, everything looks a little trippy")
+    level.player.state = "HALLUCINATE_200"
 
 
 def poison(level):
@@ -37,7 +38,9 @@ def restore_stength(level):
 
 
 def see_hidden(level):
-    pass
+    message("Tastes like carrot juice")
+    for monster in level.monsters:
+        monster.state = monster.state.replace("H", "")
 
 
 def blindness(level):
@@ -97,7 +100,7 @@ def xp_up(level):
 Name = PotionName
 
 potions = [dict(name=Name("Confusion"), p=7, f=confuse),
-           # dict(name=Name('Hallucination'), p=8, f=hallucinate),
+           dict(name=Name('Hallucination'), p=8, f=hallucinate),
            dict(name=Name('Poison'), p=8, f=poison),
            dict(name=Name("Gain Strength"), p=13, f=gain_strength),
            dict(name=Name("See Hidden"), p=3, f=see_hidden),

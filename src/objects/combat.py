@@ -33,11 +33,14 @@ def attack(x, y, level):
 
 
 def armour_drain(monster, player):
-    if randint(1, 2) == 1 and not player.wearing.protected:
+    if (randint(1, 2) == 1 and
+            player.wearing is not None and
+            not player.wearing.protected and
+            "eather" not in player.wearing.name):
         player.wearing.defence += 1
         message("{} rusts your armour".format(monster.name))
     else:
-        message("{} attacks Rogue and misses".format(monster.name))
+        message("A strange liquid evapourates off your armour".format(monster.name))
 
 
 def hp_drain(monster, dmg):
@@ -62,20 +65,30 @@ def make_attack(x, y, dmg):
     message(msg)
 
 
-def does_attack_hit(x, y, lvl_num):
+def strength_mod(player, monster):
+    if player.strength < 7:
+        mod = player.strength - 7
+    elif player.strength > 23:
+        mod = 3
+    else:
+        mod = (player.strength - 15)//2
+    return mod
+
+
+
+def does_attack_hit(x, y, lvl_num, weapon=None):
+    mod = 0
     if type(x) == Player:
+        if weapon is None:
+            weapon = x.wielding
+        mod = weapon.dexterity_mod
         if x.state == "CONFUSE_NEXT_MONSTER":
             y.state = "CONFUSED1234567890"
             x.state = "ACTIVE"
             message("{} looks confused".format(y.name.capitalize()))
         elif not y.state.startswith("CONFUSED"):
             y.state = "TARGETING"
-        if x.strength < 7:
-            mod = x.strength - 7
-        elif x.strength > 23:
-            mod = 3
-        else:
-            mod = (x.strength - 15)//2
+        mod += strength_mod(x, y)
         level = x.xp_level
         if "F" in y.flags:
             mod -= 3
@@ -104,12 +117,16 @@ def mod_attack(x):
 
 
 def damage_done_by(x):
-    return dice_roll(x.attack) + mod_attack(x)
+    if hasattr(x, "wielding"):
+        weapon_mod = x.wielding.attack_mod
+    else:
+        weapon_mod = 0
+    return dice_roll(x.attack) + mod_attack(x) + weapon_mod
 
 
 def thrown_damage_done_by(itm, player):
     if hasattr(itm, "thrown"):
-        dmg = dice_roll(itm.thrown)
+        dmg = dice_roll(itm.thrown) + itm.attack_mod
         if player.wielding.name == "Short Bow" and itm.name == "Arrow":
             dmg += 2
     else:

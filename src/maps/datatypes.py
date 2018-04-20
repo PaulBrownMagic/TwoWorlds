@@ -41,7 +41,7 @@ class Tile:
 
 class Room:
     origin: Location
-    tiles: [Tile]
+    tiles: [[Tile]]
     width: int
     height: int
     doors: dict

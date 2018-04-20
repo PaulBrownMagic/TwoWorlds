@@ -1,5 +1,6 @@
 from itertools import chain
 from functools import partial
+from random import choice
 
 import tcod
 
@@ -54,13 +55,18 @@ def draw_map(mp, world):
                                      tile_colour(mp, world, fov, x, y))
 
 
-def blind_draw_map(level):
-    remaining = int(level.player.state.split("_")[-1])
+def decr_state(player):
+    state, remaining = player.state.split("_")
+    remaining = int(remaining)
     remaining -= 1
     if remaining == 0:
-        level.player.state = "ACTIVE"
+        player.state = "ACTIVE"
+        message("Everything returns to normal")
     else:
-        level.player.state = "BLIND_{}".format(remaining)
+        player.state = "{}_{}".format(state, remaining)
+
+
+def blind_draw_map(level):
     for tile in chain(*level.map_grid.tiles):
         x, y = tile.location
         in_fov = tcod.map_is_in_fov(level.map_grid, x, y)
@@ -78,11 +84,11 @@ def blind_draw_map(level):
                                      )
 
 
-def draw_in_map(mp, item):
+def draw_in_map(draw_func, mp, item):
     in_fov = tcod.map_is_in_fov(mp, item.location.x, item.location.y)
     if ((in_fov or item.found) and not (hasattr(item, "flags") and
                                         "H" in item.flags)):
-        _draw(item)
+        draw_func(item)
 
 
 def draw_trap(trap):
@@ -98,10 +104,40 @@ def _draw(item):
                                      item.colour)
 
 
+def h_draw(item):
+    items = "/%:'?!])"
+    monsters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if item.char in items:
+        char = choice(items)
+    elif item.char in monsters:
+        char = choice(monsters)
+    else:
+        char = item.char
+    colour = choice([tcod.color.white, tcod.color.red, tcod.color.blue,
+                     tcod.color.green, tcod.color.amber, tcod.color.azure,
+                     tcod.color.brass, tcod.color.celadon, tcod.color.copper,
+                     tcod.color.chartreuse, tcod.color.crimson, tcod.color.cyan,
+                     tcod.color.fuchsia, tcod.color.han, tcod.color.flame,
+                     tcod.color.gold, tcod.color.lime, tcod.color.magenta,
+                     tcod.color.orange, tcod.color.peach, tcod.color.pink,
+                     tcod.color.purple, tcod.color.sea, tcod.color.turquoise,
+                     tcod.color.violet, tcod.color.yellow])
+    tcod.console_put_char(con, item.location.x, item.location.y, char)
+    tcod.console_set_char_foreground(con,
+                                     item.location.x,
+                                     item.location.y,
+                                     colour)
+
+
 def update_screen(level):
-    draw = partial(draw_in_map, level.map_grid)
+    if level.player.state.startswith("HALLUCINATE"):
+        draw = partial(draw_in_map, h_draw, level.map_grid)
+        decr_state(level.player)
+    else:
+        draw = partial(draw_in_map, _draw, level.map_grid)
     if level.player.state.startswith("BLIND"):
         blind_draw_map(level)
+        decr_state(level.player)
     else:
         draw_map(level.map_grid, level.world)
         draw(level.stairs)

@@ -22,20 +22,27 @@ weapons = [mace, longsword, shortbow, twosword]
 projectiles = [arrow, dagger, dart, shuriken, spear]
 all_weapons = weapons + projectiles
 
+weights = [1, 2, 10, 3, 2]
+mods = [-2, -1, 0, 1, 2]
+
 
 def make_weapon(w):
     if w in weapons:
         return Weapon(name=w['name'],
                       char=")",  # ] for armour
                       colour=W_COLOUR,
-                      attack=w['damage']
+                      attack=w['damage'],
+                      attack_mod=choices(mods, weights)[0],
+                      dexterity_mod=choices(mods, weights)[0],
                       )
     elif w in projectiles:
         return Projectile(name=w['name'],
                           char=")",
                           colour=W_COLOUR,
                           attack=w['damage'],
-                          thrown=w['thrown']
+                          thrown=w['thrown'],
+                          attack_mod=choices(mods, weights)[0],
+                          dexterity_mod=choices(mods, weights)[0],
                           )
 
 

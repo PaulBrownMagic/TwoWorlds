@@ -10,7 +10,8 @@ from src.maps import (Location,
                       is_walkable,
                       same_location,
                       place_in_room,
-                      distance_to)
+                      distance_to,
+                      in_same_room)
 from src.gui import (message,
                      update_screen,
                      inventory_menu,
@@ -28,6 +29,11 @@ from src.objects.actions import (actions,
                                  )
 from src.objects.food import foods, make_food
 from src.objects.monsters import monsters_for, make_monster
+from src.objects.armour import get_x_armours
+from src.objects.magicwands import get_x_wands
+from src.objects.potions import get_x_potions
+from src.objects.scrolls import get_x_scrolls_for
+from src.objects.weapons import get_x_weapons
 
 # flags: A:armour drain, M:mean, F:flying, H:hidden, R:regen hp,
 # V:drain hp, X:drain xp, S:stationairy, L:lure player
@@ -53,7 +59,10 @@ def run_move_logic(level, user_input):
     game_state = triggertrap(level) if game_state is None else game_state
     tick_move(level)
     for monster in level.monsters:
-        monster_move(level, monster)
+        if monster.state == "DEAD":
+            monster_drop(monster, level)
+        else:
+            monster_move(level, monster)
     return "PLAYING" if game_state is None else game_state
 
 
@@ -72,6 +81,7 @@ def tick_move(level):
 
 def add_monster(level):
     new_monster = make_monster(choice(monsters_for(level)))
+    new_monster.state = "ACTIVE"
     place_in_room(level, new_monster)
     while distance_to(level.player.location, new_monster.location) < 24:
         place_in_room(level, new_monster)
@@ -160,26 +170,57 @@ def monster_move(level, monster):
 def update_monster_state(level, monster):
     in_fov = tcod.map_is_in_fov(level.map_grid,
                                 monster.location.x, monster.location.y)
+    in_player_room = in_same_room(level.player.location,
+                                  monster.location,
+                                  level.map_grid)
     if monster.hp <= 0:
         monster.state = "DEAD"
     elif in_fov and monster.state == "SNOOZING" and randint(1, 10) < 10:
         monster.state = "ACTIVE"
-    elif in_fov and "M" in monster.flags and randint(1, 10) < 10:
+    elif (in_fov or in_player_room) and "M" in monster.flags and randint(1, 10) < 10:
         monster.state = "TARGETING"
     elif in_fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
         monster.state = "TARGETING"
 
 
+
+def monster_drop(monster, level):
+    if type(monster) == Monster and randint(1, 100) <= monster.carry:
+        item = monster_drop_item(level)
+        item.location = monster.location
+        level.items.append(item)
+
+
+def monster_drop_item(level):
+    if level.world == "NORMAL":
+        wrl = get_x_weapons(1) + get_x_armours(1)
+    else:
+        wrl = get_x_wands(1)
+    return choice(wrl + get_x_potions(1) + get_x_scrolls_for(1, level))
+
+
 def make_player():
-    player = Player(weapon=make_weapon(mace),
+    sb = make_weapon(shortbow)
+    sb.attack_mod = 1
+    sb.dexterity_mod = 1
+    sb.realname = "[+1] [+1] {}".format(sb.name)
+    sb.name = sb.realname
+    ar = make_weapon(arrow)
+    ar.attack_mod = 0
+    ar.dexterity_mod = 0
+    ar.realname = "[+0] [+0] {}".format(ar.name)
+    ar.name = ar.realname
+    mc = make_weapon(mace)
+    mc.attack_mod = 2
+    mc.dexterity_mod = 2
+    mc.realname = "[+2] [+2] {}".format(mc.name)
+    mc.name = mc.realname
+    player = Player(weapon=mc,
                     armour=make_armour(ringmail),
-                    items=[make_weapon(shortbow),
-                           make_weapon(arrow),
+                    items=[sb,
+                           ar,
                            make_food(foods[0]),
                            ]
                     )
-    for itm in player.inventory.values():
-        if itm.item.name == "Arrow":
-            itm.count = 30
-            break
+    player.inventory['d'].count = 30
     return player

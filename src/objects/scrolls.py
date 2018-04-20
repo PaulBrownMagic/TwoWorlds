@@ -62,6 +62,8 @@ def identify(level):
     itm = itm.item
     if hasattr(itm.name, "realname"):
         itm.name.name = itm.name.realname
+    elif hasattr(itm, "realname"):
+        itm.name = itm.realname
     message("You identified {}".format(itm.name))
 
 
