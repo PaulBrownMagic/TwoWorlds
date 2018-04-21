@@ -23,7 +23,7 @@ class Tile:
         self.location = location
         self.walkable = walkable
         self.transparent = transparent
-        self.explored = True # False
+        self.explored = False
         self.hidden = False
 
     @property
@@ -119,7 +119,7 @@ class Passage:
 
 class Map(TcodMap):
 
-    def __init__(self):
+    def __init__(self, lvl_num):
         # Rooms in 3x3 grid:
         # 0 1 2
         # 3 4 5
@@ -145,9 +145,12 @@ class Map(TcodMap):
                       for y in range(MAP_HEIGHT)]
         self.gen_rooms()
         self.gen_passages()
-        self.remove_room(0)
-        self.gen_maze()
-        self.hide_tiles()
+        if lvl_num > 4:
+            self.remove_room(0)
+            self.gen_maze()
+            self.hide_tiles()
+        else:
+            self.remove_room(5-lvl_num)
         self.make_rooms()
         self.make_passages()
         self.update_c_map()

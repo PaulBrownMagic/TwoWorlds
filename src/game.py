@@ -38,8 +38,8 @@ def play_game():
     level_number = 1
     level = setup_level("NORMAL", level_number, player)
     message("Welcome to Rogue: Through The Veil")
-    message("Find the Amulet of Yendor and return it, but beware, \
-            the magic realm is never far away.")
+    message("Find the Amulet of Yendor and return it, but beware, the magic realm is never far away.\n")
+    message("--- (? to view controls)")
     update_screen(level)
 
     while not tcod.console_is_window_closed():

@@ -16,7 +16,7 @@ def in_room_target(monster, level):
 
 
 # flags: A: armour drain, M: mean, F: flying, H: hidden, R: regen hp,
-# V: drain hp, X: drain xp, S: stationairy, L: lure player
+# V: drain hp, X: drain xp, S: stationairy, L: lure player, Z: drain strength
 
 
 nd = dict(name="Dodo", levels=(1, 3), carry=0, flags="",
@@ -37,7 +37,7 @@ ni = dict(name="Iguana", levels=(7, 12), carry=0, flags="",
           xp=10, ac=7, hp="3d8", dmg="1d5", state=A)
 nb = dict(name="Bandit", levels=(8, 14), carry=25, flags="M",
           xp=28, ac=5, hp="4d8", dmg="1d8", state=A)
-nh = dict(name="Hobo", levels=(9, 12), carry=10, flags="",
+nh = dict(name="Hobo", levels=(9, 12), carry=10, flags="Z",
           xp=12, ac=8, hp="5d8", dmg="1d4", state=SL)
 nv = dict(name="Viper", levels=(10, 15), carry=0, flags="M",
           xp=36, ac=7, hp="3d8", dmg="1d6", state=SN)

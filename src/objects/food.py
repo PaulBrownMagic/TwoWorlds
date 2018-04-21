@@ -7,7 +7,7 @@ from src.gui import message
 from src.objects.datatypes import Food, Fruit
 
 
-F_COLOUR = colour.darker_grey
+F_COLOUR = colour.dark_grey
 
 
 def eat(level):

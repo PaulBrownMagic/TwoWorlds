@@ -23,7 +23,7 @@ class Level:
         self.number = number
         self.player = player
         self.stairs = stairs
-        self.map_grid = Map()
+        self.map_grid = Map(number)
 
     @property
     def all_objects(self):

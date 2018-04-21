@@ -23,6 +23,8 @@ def attack(x, y, level):
                 hp_drain(x, dmg)
             if "X" in x.flags:
                 xp_drain(x, y)
+            if "Z" in x.flags:
+                str_drain(x, y)
         if type(y) == Monster:
             if "H" in y.flags:
                 y.flags = y.flags.replace("H", "")
@@ -51,6 +53,14 @@ def hp_drain(monster, dmg):
 
 def xp_drain(monster, player):
     player.xp -= 2*2**player.xp_level
+
+
+def str_drain(monster, player):
+    if randint(1, 3) == 3:
+        message("Fighting {} drains your strength".format(monster.name))
+        player.strength -= randint(1, 2)
+        if player.strength < 0:
+            player.strength = 0
 
 
 def make_attack(x, y, dmg):
@@ -113,6 +123,8 @@ def mod_attack(x):
             mod = 4
         elif x.strength > 21:
             mod = 5
+    else:
+        mod += int(x.attack.split('d')[0])
     return mod
 
 

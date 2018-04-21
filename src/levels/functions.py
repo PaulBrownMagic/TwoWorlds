@@ -1,5 +1,5 @@
 from functools import partial
-from random import choice, randint
+from random import choice, randint, choices
 
 from src.levels.datatypes import Level
 from src.maps import place_in_room
@@ -24,7 +24,7 @@ def make_level(world, level_number, player):
                   stairs,
                   )
 
-    amount_of_food = randint(0, 2) if player.hunger > 200 else randint(1, 3)
+    amount_of_food = randint(0, 1) if player.hunger > 150 else randint(1, 2)
     level.items = get_x_foods(amount_of_food)
     if world == "NORMAL":
         add_normal_items(level)
@@ -45,16 +45,30 @@ def make_level(world, level_number, player):
 
 
 def add_normal_items(level):
-    level.items += get_x_armours(randint(0, 2))
-    level.items += get_x_weapons(randint(0, 2))
-    level.items += get_x_scrolls_for(randint(1, 3), level)
-    level.items += get_x_potions(randint(0, 2))
+    armours = get_x_armours(5)
+    weapons = get_x_weapons(5)
+    scrolls = get_x_scrolls_for(5, level)
+    potions = get_x_potions(5)
+    weights = [1, 1, 4, 5]
+    banks = choices([armours, weapons, scrolls, potions],
+                    weights,
+                    k=randint(1, 5))
+    add_from_banks(level, banks)
 
 
 def add_magic_items(level):
-    level.items += get_x_scrolls_for(randint(1, 4), level)
-    level.items += get_x_potions(randint(1, 4))
-    level.items += get_x_wands(randint(0, 3+level.number//4))
+    scrolls = get_x_scrolls_for(6, level)
+    potions = get_x_potions(6)
+    wands = get_x_wands(6)
+    weights = [2, 2, 1]
+    banks = choices([scrolls, potions, wands], weights, k=randint(2, 6))
+    add_from_banks(level, banks)
+
+
+def add_from_banks(level, banks):
+    for bank in banks:
+        itm = choice(bank)
+        level.items.append(itm)
 
 
 def is_alive(obj):
