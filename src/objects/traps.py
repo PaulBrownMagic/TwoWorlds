@@ -10,7 +10,7 @@ from src.objects.scrolls import (teleport,
                                  transition_worlds)
 from src.objects.potions import confuse
 
-T_COLOUR = colour.black
+T_COLOUR = colour.dark_grey
 
 
 def poison_dart(level):

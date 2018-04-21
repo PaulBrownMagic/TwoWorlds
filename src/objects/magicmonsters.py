@@ -4,7 +4,7 @@ A = "ACTIVE"
 STATES = [SL, SN, A]
 
 # flags: A: armour drain, M: mean, F: flying, H: hidden, R: regen hp,
-# V: drain hp, X: drain xp, S: stationairy, L: lure player
+# V: drain hp, X: drain xp, S: stationairy, L: lure player, Z: drain str
 
 a = dict(name="Aquator", levels=(8, 17), carry=0, flags="A", xp=20, ac=2,
          hp="5d8", dmg="1d1", state=A)
@@ -32,7 +32,7 @@ l = dict(name="Ladon", levels=(14, 23), carry=70, flags="", xp=80, ac=3,
          hp="8d8", dmg="3d6", state=SL)
 m = dict(name="Mandrake", levels=(18, 999), carry=0, flags="", xp=200, ac=2,
          hp="6d8", dmg="4d5", state=SL)
-n = dict(name="Nidhogg", levels=(10, 19), carry=100, flags="M", xp=37, ac=9,
+n = dict(name="Nidhogg", levels=(10, 19), carry=100, flags="MZ", xp=37, ac=9,
          hp="3d8", dmg="3d6", state=SN)
 o = dict(name="Orc", levels=(3, 12), carry=15, flags="", xp=5, ac=6,
          hp="1d8", dmg="1d8", state=A)

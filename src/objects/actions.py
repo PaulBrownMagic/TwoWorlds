@@ -28,9 +28,10 @@ from src.objects.combat import attack
 
 
 def get_id_action(level):
+    message("--- (* to view inventory)")
     update_screen(level)
     key = tcod.console_wait_for_keypress(flush=True)
-    while key.vk != 66:
+    while key.vk not in [66, 1]:
         key = tcod.console_wait_for_keypress(flush=False)
     if key.text == "*":
         inventory_menu(level)
@@ -39,12 +40,10 @@ def get_id_action(level):
         return key.text
     else:
         message("Unknown item")
+        return None
 
 
 def get_from_inventory(i, inventory):
-    if i is None:
-        message("Invalid Key")
-        return
     itm = inventory[i]
     if itm is None:
         message("No such item")
@@ -67,6 +66,8 @@ def wear_armour(level):
     else:
         message("Wear what?")
         i = get_id_action(level)
+        if i is None:
+            return
         itm = get_from_inventory(i, level.player.inventory)
         if itm is None:
             return
@@ -81,6 +82,8 @@ def wear_armour(level):
 def wield_weapon(level):
     message("Wield what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None:
         return
@@ -102,6 +105,8 @@ def decr(itm, letter, inventory):
 def drop_item(level):
     message("Drop what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None:
         return
@@ -120,6 +125,8 @@ def drop_item(level):
 def read_scroll(level):
     message("Read what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None:
         return
@@ -134,6 +141,8 @@ def read_scroll(level):
 def quaff_potion(level):
     message("Quaff what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None:
         return
@@ -156,11 +165,15 @@ def get_dir_action(level):
     update_screen(level)
     key = tcod.console_wait_for_keypress(flush=False)
     while not is_direction_key(key):
+        if key.vk == 1:  # ESC
+            return None
         key = tcod.console_wait_for_keypress(flush=False)
     if key.vk in arrows:
         return arrows[key.vk]
     elif key.vk == 66 and key.text in "hjklyubn":
         return vim[key.text]
+    else:
+        return None
 
 
 def find_target(direction, dist, level):
@@ -180,9 +193,14 @@ def find_target(direction, dist, level):
 
 
 def throw_item(level):
-    target = find_target(get_dir_action(level), 10, level)
+    direction = get_dir_action(level)
+    if direction is None:
+        return
+    target = find_target(direction, 10, level)
     message("Throw what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None or not hasattr(itm, 'item'):
         message("No such item")
@@ -208,9 +226,14 @@ def throw_item(level):
 
 
 def zap_wand(level):
-    target = find_target(get_dir_action(level), 8, level)
+    direction = get_dir_action(level)
+    if direction is None:
+        return
+    target = find_target(direction, 8, level)
     message("Zap with what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None or not hasattr(itm, 'item') or itm.item is None:
         message("No such wand")
@@ -230,6 +253,8 @@ def zap_wand(level):
 def eat(level):
     message("Eat what?")
     i = get_id_action(level)
+    if i is None:
+        return
     itm = get_from_inventory(i, level.player.inventory)
     if itm is None:
         message("No such food")
@@ -340,8 +365,10 @@ def getting_hungry(player):
 
 def move_no_pickup(level):
     if getting_hungry(level.player):
-        x, y = movements[get_dir_action(level)]
-        _move(level.player, x, y, level)
+        direction = get_dir_action(level)
+        if direction is not None:
+            x, y = movements[direction]
+            _move(level.player, x, y, level)
 
 
 def _move(obj, x, y, level, stationary=False):
@@ -395,6 +422,14 @@ def search(level):
             if tile.hidden:
                 tile.hidden = False
                 tile.walkable = True
+            hidden_monsters = [m for m in level.monsters if "H" in m.flags
+                               and same_location(tile.location, m.location)]
+            for hm in hidden_monsters:
+                hm.flags = hm.flags.replace("H", "")
+            traps = [t for t in level.traps if same_location(t.location,
+                                                             tile.location)]
+            for trap in traps:
+                trap.found = True
         level.map_grid.update_c_map()
 
 
