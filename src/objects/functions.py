@@ -8,10 +8,12 @@ from src.config import movements
 from src.maps import (Location,
                       is_blocked,
                       is_walkable,
+                      is_transparent,
                       same_location,
                       place_in_room,
                       distance_to,
-                      in_same_room)
+                      in_same_room,
+                      in_fov)
 from src.gui import (message,
                      update_screen,
                      inventory_menu,
@@ -43,8 +45,6 @@ move_ticker = 1
 
 def run_move_logic(level, user_input):
     game_state = None
-    if level.player.state == "DEAD":
-        return "PLAYER_DEAD"
     if user_input in movements:
         if getting_hungry(level.player):
             x, y = movements[user_input]
@@ -54,16 +54,20 @@ def run_move_logic(level, user_input):
         game_state = actions[user_input](level)
     else:  # Input not recognised, no real turn
         return "PLAYING"
-    # Carry on with the turn
-    find_stairs(level)
-    game_state = triggertrap(level) if game_state is None else game_state
-    tick_move(level)
-    for monster in level.monsters:
-        if monster.state == "DEAD":
-            monster_drop(monster, level)
-        else:
-            monster_move(level, monster)
-    return "PLAYING" if game_state is None else game_state
+    if user_input != "INVENTORY":
+        # Carry on with the turn
+        find_stairs(level)
+        game_state = triggertrap(level) if game_state is None else game_state
+        tick_move(level)
+        for monster in level.monsters:
+            if monster.state == "DEAD":
+                monster_drop(monster, level)
+            else:
+                monster_move(level, monster)
+    if level.player.state == "DEAD":
+        return "PLAYER_DEAD"
+    else:
+        return "PLAYING" if game_state is None else game_state
 
 
 def tick_move(level):
@@ -73,9 +77,9 @@ def tick_move(level):
         for mon in filter(lambda m: "R" in m.flags, level.monsters):
             regen_health(mon, level.number)
         regen_health(level.player, level.number)
-    if move_ticker % 100 == 0:
+    if move_ticker % 80 == 0:
         add_monster(level)
-    if move_ticker % 20 == 0 and move_ticker % 100 == 0:
+    if move_ticker % 20 == 0 and move_ticker % 80 == 0:
         move_ticker = 1
 
 
@@ -83,9 +87,13 @@ def add_monster(level):
     new_monster = make_monster(choice(monsters_for(level)))
     new_monster.state = choice(["ACTIVE", "TARGETING"])
     place_in_room(level, new_monster)
-    while distance_to(level.player.location, new_monster.location) < 24:
-        place_in_room(level, new_monster)
-    level.monsters.append(new_monster)
+    for _ in range(10):
+        if distance_to(level.player.location, new_monster.location) < 24:
+            place_in_room(level, new_monster)
+        else:
+            break
+    if distance_to(level.player.location, new_monster.location) < 24:
+        level.monsters.append(new_monster)
 
 
 def incr_hp(monster):
@@ -115,9 +123,7 @@ def regen_health(mo, i):
 
 
 def find_stairs(level):
-    in_fov = tcod.map_is_in_fov(level.map_grid, level.stairs.location.x,
-                                level.stairs.location.y)
-    if in_fov:
+    if in_fov(level.stairs.location, level):
         level.stairs.found = True
 
 
@@ -144,42 +150,48 @@ def monster_move(level, monster):
         x, y = movements[choice(list(movements))]
         _move(monster, x, y, level, stationary)
     elif monster.state == "TARGETING":
-        astar = tcod.path_new_using_map(level.map_grid, 1.95)
-        tcod.path_compute(astar, monster.location.x, monster.location.y,
-                          level.player.location.x, level.player.location.y)
-        next_tile = tcod.path_get(astar, 0)
+        diag = 1.95 if is_transparent(monster.location, level) else 0
+        try:
+            astar = tcod.path_new_using_map(level.map_grid, diag)
+            tcod.path_compute(astar, monster.location.x, monster.location.y,
+                              level.player.location.x, level.player.location.y)
+            next_tile = tcod.path_get(astar, 0)
+        except:
+            print("ASTAR FAILURE")
+            next_tile = (randint(-1, 1), randint(-1, 1))
         x, y = (next_tile[0] - monster.location.x,
                 next_tile[1] - monster.location.y)
         _move(monster, x, y, level, stationary)
 
-    in_fov = tcod.map_is_in_fov(level.map_grid, monster.location.x,
-                                monster.location.y)
     close = distance_to(monster.location, level.player.location) > 2
-    if "L" in monster.flags and close and in_fov:
+    if "L" in monster.flags and close and in_fov(monster.location, level):
         update_screen(level)
-        astar = tcod.path_new_using_map(level.map_grid, 1.95)
-        tcod.path_compute(astar,
-                          level.player.location.x, level.player.location.y,
-                          monster.location.x, monster.location.y)
-        next_tile = tcod.path_get(astar, 0)
+        try:
+            astar = tcod.path_new_using_map(level.map_grid, 1.95)
+            tcod.path_compute(astar,
+                              level.player.location.x, level.player.location.y,
+                              monster.location.x, monster.location.y)
+            next_tile = tcod.path_get(astar, 0)
+        except:
+            print("ASTAR FAILURE")
+            next_tile = (randint(-1, 1), randint(-1, 1))
         x, y = (next_tile[0] - level.player.location.x,
                 next_tile[1] - level.player.location.y)
         _move(level.player, x, y, level)
 
 
 def update_monster_state(level, monster):
-    in_fov = tcod.map_is_in_fov(level.map_grid,
-                                monster.location.x, monster.location.y)
+    fov = in_fov(monster.location, level)
     in_player_room = in_same_room(level.player.location,
                                   monster.location,
                                   level.map_grid)
     if monster.hp <= 0:
         monster.state = "DEAD"
-    elif in_fov and monster.state == "SNOOZING" and randint(1, 10) < 9:
+    elif fov and monster.state == "SNOOZING" and randint(1, 10) < 9:
         monster.state = "ACTIVE"
-    elif (in_fov or in_player_room) and "M" in monster.flags and randint(1, 10) < 10:
+    elif (fov or in_player_room) and "M" in monster.flags and randint(1, 10) < 10:
         monster.state = "TARGETING"
-    elif in_fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
+    elif fov and monster.state == "ACTIVE" and randint(1, 10) < 8:
         monster.state = "TARGETING"
 
 

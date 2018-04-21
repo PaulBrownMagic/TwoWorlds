@@ -28,7 +28,6 @@ def attack(x, y, level):
         if type(y) == Monster:
             if "H" in y.flags:
                 y.flags = y.flags.replace("H", "")
-                print(y.flags)
         make_attack(x, y, dmg)
     else:
         message("{} attacks {} and misses".format(x.name, y.name))
@@ -85,13 +84,12 @@ def strength_mod(player, monster):
     return mod
 
 
-
 def does_attack_hit(x, y, lvl_num, weapon=None):
     mod = 0
     if type(x) == Player:
         if weapon is None:
             weapon = x.wielding
-        mod = weapon.dexterity_mod
+        mod = weapon.dexterity_mod if hasattr(weapon, "dexterity_mod") else 0
         if x.state == "CONFUSE_NEXT_MONSTER":
             y.state = "CONFUSED1234567890"
             x.state = "ACTIVE"
@@ -132,7 +130,7 @@ def damage_done_by(x):
     if hasattr(x, "wielding"):
         weapon_mod = x.wielding.attack_mod
     else:
-        weapon_mod = 1
+        weapon_mod = 0
     return dice_roll(x.attack) + mod_attack(x) + weapon_mod
 
 

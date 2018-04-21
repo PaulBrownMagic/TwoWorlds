@@ -5,5 +5,7 @@ from src.maps.functions import (place_in_room,
                                 same_location,
                                 distance_to,
                                 in_same_room,
-                                adjacent_tiles
+                                adjacent_tiles,
+                                is_transparent,
+                                in_fov,
                                 )

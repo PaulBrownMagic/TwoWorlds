@@ -61,8 +61,8 @@ movements = {"MOVE_UP": (0, -1),
              "WAIT": (0, 0),
              }
 
-HUNGRY = 700
-HUNGRY_WEAK = 800
+HUNGRY = 750
+HUNGRY_WEAK = 850
 step = 25
-HUNGRY_FEINT = [HUNGRY_WEAK + x for x in range(1, 6*step, step)]
+HUNGRY_FEINT = [HUNGRY_WEAK + x for x in range(step, 6*step, step)]
 HUNGRY_DIE = HUNGRY_FEINT[-1] + 5

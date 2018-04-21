@@ -8,7 +8,7 @@ from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE
 from src.gui.config import FONT, COLOURS
 from src.gui.panels import panel, update_panel, message
 from src.maps.config import MAP_HEIGHT
-from src.maps import same_location
+from src.maps import same_location, is_walkable, is_blocked, is_transparent, Location, in_fov
 
 tcod.console_set_custom_font(FONT,
                              tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GRAYSCALE)
@@ -25,34 +25,33 @@ def toggle_fullscreen():
     tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
 
-def tile_colour(mp, world, fov, x, y):
-    tile = "GROUND" if tcod.map_is_walkable(mp, x, y) else "WALL"
-    return COLOURS[world][fov][tile]
+def tile_colour(level, fov, loc):
+    tile = "GROUND" if is_walkable(loc, level) else "WALL"
+    return COLOURS[level.world][fov][tile]
 
 
-def tile_char(mp, x, y):
-    if tcod.map_is_walkable(mp, x, y):
-        c = "." if tcod.map_is_transparent(mp, x, y) else "#"
+def tile_char(level, loc):
+    if is_walkable(loc, level):
+        c = "." if is_transparent(loc, level) else "#"
     else:
         c = " "
     return c
 
 
-def draw_map(mp, world):
-    for tile in chain(*mp.tiles):
-        x, y = tile.location
-        if tcod.map_is_in_fov(mp, x, y):
+def draw_map(level):
+    for tile in chain(*level.map_grid.tiles):
+        if in_fov(tile.location, level):
             fov = "LIT"
             tile.explored = True
         else:
             fov = "DARK"
         if tile.explored:
             tcod.console_put_char_ex(con,
-                                     x,
-                                     y,
-                                     tile_char(mp, x, y),
+                                     tile.location.x,
+                                     tile.location.y,
+                                     tile_char(level, tile.location),
                                      tcod.color.black,
-                                     tile_colour(mp, world, fov, x, y))
+                                     tile_colour(level, fov, tile.location))
 
 
 def decr_state(player):
@@ -68,26 +67,22 @@ def decr_state(player):
 
 def blind_draw_map(level):
     for tile in chain(*level.map_grid.tiles):
-        x, y = tile.location
-        in_fov = tcod.map_is_in_fov(level.map_grid, x, y)
-        if not in_fov:
+        if not in_fov(tile.location, level):
             tile.explored = False
         elif same_location(level.player.location, tile.location):
             tile.explored = True
         if tile.explored:
             tcod.console_put_char_ex(con,
-                                     x, y,
-                                     tile_char(level.map_grid, x, y),
+                                     tile.location.x, tile.location.y,
+                                     tile_char(level, tile.location),
                                      tcod.color.black,
-                                     tile_colour(level.map_grid, level.world,
-                                                 "DARK", x, y)
+                                     tile_colour(level, "DARK", tile.location)
                                      )
 
 
-def draw_in_map(draw_func, mp, item):
-    in_fov = tcod.map_is_in_fov(mp, item.location.x, item.location.y)
-    if ((in_fov or item.found) and not (hasattr(item, "flags") and
-                                        "H" in item.flags)):
+def draw_in_map(draw_func, level, item):
+    if ((in_fov(item.location, level) or item.found) and
+            not (hasattr(item, "flags") and "H" in item.flags)):
         draw_func(item)
 
 
@@ -131,15 +126,15 @@ def h_draw(item):
 
 def update_screen(level):
     if level.player.state.startswith("HALLUCINATE"):
-        draw = partial(draw_in_map, h_draw, level.map_grid)
+        draw = partial(draw_in_map, h_draw, level)
         decr_state(level.player)
     else:
-        draw = partial(draw_in_map, _draw, level.map_grid)
+        draw = partial(draw_in_map, _draw, level)
     if level.player.state.startswith("BLIND"):
         blind_draw_map(level)
         decr_state(level.player)
     else:
-        draw_map(level.map_grid, level.world)
+        draw_map(level)
         draw(level.stairs)
         list(map(draw_trap, level.traps))
         list(map(draw, level.items))

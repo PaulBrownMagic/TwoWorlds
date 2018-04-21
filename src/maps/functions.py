@@ -2,6 +2,8 @@ from itertools import chain, product
 from math import sqrt
 from random import choice
 
+import tcod
+
 
 def place_in_room(level, obj):
     mp = level.map_grid
@@ -28,20 +30,30 @@ def in_same_room(l1, l2, mp):
     return False
 
 
-def is_walkable(location, level):
-    if level.map_grid.walkable[location.y][location.x]:
-        return True
-    else:
+def in_fov(location, level):
+    try:
+        return tcod.map_is_in_fov(level.map_grid, location.x, location.y)
+    except:
+        print("IN FOV FAILED")
         return False
+
+
+def is_walkable(location, level):
+    return level.map_grid.tiles[location.y][location.x].walkable
+
+
+def is_transparent(location, level):
+    return level.map_grid.tiles[location.y][location.x].transparent
 
 
 def is_blocked(location, level):
     if same_location(location, level.player.location):
         return True
+    # else
 
     def on_tile(o):
         return same_location(location, o.location)
-    return any([ob.blocks for ob in filter(on_tile, level.all_objects)])
+    return any([ob.blocks for ob in filter(on_tile, level.monsters)])
 
 
 def distance_to(loc1, loc2):

@@ -29,9 +29,8 @@ def view_whole_map(level):
 def hold_monster(level):
     """Freezes nearby monsters"""
     message("Nearby monsters freeze")
-    ploc = level.player.location
     close_by = [m for m in level.monsters
-                if distance_to(ploc, m.loc) < 6]
+                if distance_to(level.player.location, m.location) < 6]
     for m in close_by:
         m.flags.append("S")
 
@@ -88,10 +87,10 @@ def enchant_weapon(level):
     sides = ceil(total/dice)
     level.player.wielding.attach = "{}d{}".format(dice, sides)
     """
-    ugr = choice([level.player.wielding.attack_mod,
-                  level.player.wielding.dexterity_mod])
-    upr += 1
-
+    if randint(0, 1) == 0:
+        level.player.wielding.attack_mod += 1
+    else:
+        level.player.wielding.dexterity_mod += 1
 
 
 def create_monster(level):

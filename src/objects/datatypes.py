@@ -155,12 +155,13 @@ class Weapon(Item):
         self.attack = attack
         self.attack_mod = attack_mod
         self.dexterity_mod = dexterity_mod
+        self._name = self.name
 
     @property
     def realname(self):
         return "[{}] [{}] {}".format(pos_neg(self.attack_mod),
                                      pos_neg(self.dexterity_mod),
-                                     self.name)
+                                     self._name)
 
 
 class Projectile(Weapon):
@@ -214,7 +215,7 @@ class Player(MovingObject):
 
     @property
     def xp_to_level_up(self):
-        return 15*2**self.xp_level
+        return 10*2**self.xp_level
 
     @property
     def attack(self):

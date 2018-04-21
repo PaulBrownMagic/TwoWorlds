@@ -222,6 +222,9 @@ def throw_item(level):
                         thrown_damage_done_by(itm, level.player))
 
         else:
+            itm.location = target.location
+            itm.found = False
+            level.items.append(itm)
             message("Rogue attacks {} and misses".format(target.name))
 
 
