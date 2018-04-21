@@ -122,6 +122,7 @@ class Food(FunctioningItem):
     def __init__(self, name, char, colour, function, taste):
         super().__init__(name, char, colour, function)
         self.taste = taste
+        self.weight = 0.5
 
 
 class Fruit(Food):
@@ -206,7 +207,10 @@ class Player(MovingObject):
         self.inventory['a'] = InventoryItem(armour)
         self.inventory['b'] = InventoryItem(weapon)
         for l, i in zip("cdefghijklmnopqrstuvwxyz", items):
-            self.inventory[l] = InventoryItem(i)
+            if type(i) == Food:
+                self.inventory[l] = InventoryItem(i, count=2, max_count=50)
+            else:
+                self.inventory[l] = InventoryItem(i)
 
     @property
     def xp_to_level_up(self):

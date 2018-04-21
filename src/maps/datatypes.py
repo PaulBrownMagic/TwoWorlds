@@ -16,13 +16,15 @@ class Tile:
     location: Location
     walkable: bool
     transparent: bool
+    hidden: bool
     explored: bool
 
     def __init__(self, location, walkable=False, transparent=False):
         self.location = location
         self.walkable = walkable
         self.transparent = transparent
-        self.explored = False
+        self.explored = True # False
+        self.hidden = False
 
     @property
     def char(self):
@@ -144,7 +146,8 @@ class Map(TcodMap):
         self.gen_rooms()
         self.gen_passages()
         self.remove_room(0)
-        self.make_maze()
+        self.gen_maze()
+        self.hide_tiles()
         self.make_rooms()
         self.make_passages()
         self.update_c_map()
@@ -177,8 +180,9 @@ class Map(TcodMap):
         for pt in chain(*[p.tiles for p in self.passages]):
             tile = self.tiles[pt.location.y][pt.location.x]
             assert(tile.location == pt.location)
-            tile.walkable = True
-            tile.transparent = False
+            tile.walkable = pt.walkable
+            tile.transparent = pt.transparent
+            tile.hidden = pt.hidden
 
     def make_rooms(self):
         for t in chain(*chain(*[room.tiles for room in self.rooms])):
@@ -291,15 +295,15 @@ class Map(TcodMap):
         self.rooms.remove(rm)
         self.remove_room(chance + 1)
 
-    def make_maze(self):
+    def gen_maze(self):
         potential_rooms = [rm for rm in self.rooms
                            if rm.width > 8 and
                            rm.height > 6
                            ]
         if len(potential_rooms) > 0 and randint(0, 10) < 3:
-            self._make_maze(choice(potential_rooms))
+            self.make_maze(choice(potential_rooms))
 
-    def _make_maze(self, rm):
+    def make_maze(self, rm):
         maze = get_maze(rm.width+1, rm.height+1)
         if rm.doors["TOP"] is not None:
             loc = rm.doors["TOP"].location
@@ -323,3 +327,14 @@ class Map(TcodMap):
                 if m == 0:
                     tile.walkable = False
                 tile.transparent = False
+
+    def hide_tiles(self):
+        for _ in range(randint(0, 4)):
+            to_door = randint(-1, 1)
+            if to_door != 1:
+                tile = choice(self.passages).tiles[to_door]
+            else:
+                tile = choice(list(chain(*[p.tiles for p in self.passages])))
+            tile.hidden = True
+            tile.transparent = False
+            tile.walkable = False

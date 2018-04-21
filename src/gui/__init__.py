@@ -4,4 +4,5 @@ from src.gui.popup import (inventory_menu,
                            controls_menu,
                            died_screen,
                            win_screen,
-                           hungry_popup)
+                           hungry_popup,
+                           trap_popup)

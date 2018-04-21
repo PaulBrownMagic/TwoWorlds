@@ -1,7 +1,7 @@
 import tcod
 
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT
-from src.gui.config import SKULL_FILE, CAKE_FILE, HUNGRY_FILE
+from src.gui.config import SKULL_FILE, CAKE_FILE, HUNGRY_FILE, TRAP_FILE
 from src.gui.main import root
 from src.config import vim
 
@@ -96,3 +96,7 @@ def hungry_popup(msg):
     with open(HUNGRY_FILE) as hungry_file:
         hungry_ascii = hungry_file.readlines()
     menu(msg, hungry_ascii, 50)
+
+def trap_popup(msg):
+    with open(TRAP_FILE) as trap_file:
+        menu(msg, trap_file.readlines(), 50)

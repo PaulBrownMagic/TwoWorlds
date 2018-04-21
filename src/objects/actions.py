@@ -5,7 +5,11 @@ import tcod
 
 from src.config import (arrows, vim, movements,
                         HUNGRY, HUNGRY_DIE, HUNGRY_WEAK, HUNGRY_FEINT)
-from src.maps import same_location, Location, is_walkable, is_blocked
+from src.maps import (same_location,
+                      Location,
+                      is_walkable,
+                      is_blocked,
+                      adjacent_tiles)
 
 from src.maps.datatypes import Tile
 from src.objects.combat import (dice_roll, does_attack_hit,
@@ -385,6 +389,15 @@ def player_sleeping(level):
     return sleeping
 
 
+def search(level):
+    if randint(1, 5) == 1:
+        for tile in adjacent_tiles(level.player.location, level):
+            if tile.hidden:
+                tile.hidden = False
+                tile.walkable = True
+        level.map_grid.update_c_map()
+
+
 actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "WEAR_ARMOUR": wear_armour,
            "WIELD_WEAPON": wield_weapon,
@@ -398,4 +411,5 @@ actions = {"TAKE_OFF_ARMOUR": takeoff_armour,
            "EAT": eat,
            "PICK_UP_ITEM": autopickup,
            "MOVE_WITHOUT_PICKING_UP": move_no_pickup,
+           "SEARCH": search,
            }

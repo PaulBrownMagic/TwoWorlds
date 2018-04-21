@@ -4,5 +4,6 @@ from src.maps.functions import (place_in_room,
                                 is_blocked,
                                 same_location,
                                 distance_to,
-                                in_same_room
+                                in_same_room,
+                                adjacent_tiles
                                 )
