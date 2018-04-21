@@ -2,7 +2,7 @@ from itertools import repeat
 
 import tcod
 
-from src.config import SCREEN_WIDTH, SCREEN_HEIGHT
+from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, HUNGRY, HUNGRY_WEAK
 from src.maps.config import MAP_HEIGHT
 
 messages = []
@@ -58,6 +58,13 @@ def update_panel(level):
                                                     level.player.xp,
                                                     arm)
                        )
+    if level.player.hunger >= HUNGRY_WEAK:
+        hgr = "-- weak --"
+    elif level.player.hunger >= HUNGRY:
+        hgr = "hungry"
+    else:
+        hgr = ""
+    tcod.console_print(panel, 1, 5, hgr)
     render_messages()
     while len(messages) > 0:
         del messages[0]

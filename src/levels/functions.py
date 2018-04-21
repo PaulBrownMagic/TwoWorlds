@@ -24,11 +24,12 @@ def make_level(world, level_number, player):
                   stairs,
                   )
 
-    amount_of_food = randint(0, 1) if player.hunger > 150 else randint(1, 2)
-    level.items = get_x_foods(amount_of_food)
     if world == "NORMAL":
+        amount_food = randint(0, 1) if player.hunger > 100 else randint(1, 2)
+        level.items = get_x_foods(amount_food)
         add_normal_items(level)
     else:
+        level.items = []
         add_magic_items(level)
     if level.number > 25 and not level.player.has_amulet_of_yendor:
         level.items.append(get_amulet())

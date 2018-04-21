@@ -132,7 +132,7 @@ def damage_done_by(x):
     if hasattr(x, "wielding"):
         weapon_mod = x.wielding.attack_mod
     else:
-        weapon_mod = 0
+        weapon_mod = 1
     return dice_roll(x.attack) + mod_attack(x) + weapon_mod
 
 

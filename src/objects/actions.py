@@ -352,9 +352,9 @@ def monsters_are_scared(level):
 def getting_hungry(player):
     player.hunger += 1
     if player.hunger == HUNGRY:
-        hungry_popup("Rogue is hungry")
+        message("Rogue is hungry")
     if player.hunger == HUNGRY_WEAK:
-        hungry_popup("Rogue is weak")
+        message("Rogue is weak")
     if player.hunger in HUNGRY_FEINT:
         hungry_popup("Rogue is faint")
         return False  # Can't move

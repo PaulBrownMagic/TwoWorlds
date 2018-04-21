@@ -214,7 +214,7 @@ class Player(MovingObject):
 
     @property
     def xp_to_level_up(self):
-        return 12*2**self.xp_level
+        return 15*2**self.xp_level
 
     @property
     def attack(self):

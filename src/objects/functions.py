@@ -81,7 +81,7 @@ def tick_move(level):
 
 def add_monster(level):
     new_monster = make_monster(choice(monsters_for(level)))
-    new_monster.state = "ACTIVE"
+    new_monster.state = choice(["ACTIVE", "TARGETING"])
     place_in_room(level, new_monster)
     while distance_to(level.player.location, new_monster.location) < 24:
         place_in_room(level, new_monster)
