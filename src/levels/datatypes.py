@@ -1,10 +1,6 @@
 from src.maps.datatypes import Map
-from src.objects.datatypes import (Item,
-                                   Stairs,
-                                   Player,
-                                   Monster,
-                                   Trap,
-                                   )
+from src.objects.datatypes import Item, Stairs, Trap
+from src.characters.datatypes import Player, Monster
 
 
 class Level:

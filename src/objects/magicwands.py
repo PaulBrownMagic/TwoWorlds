@@ -3,10 +3,10 @@ from random import choice, choices, randint
 import tcod
 
 from src.maps import place_in_room
-from src.objects.combat import mod_attack, make_attack, dice_roll
-from src.objects.datatypes import WandName, MagicWand, Monster
-from src.objects.monsters import monsters, make_monster
-from src.objects.scrolls import create_monster as scroll_create_monster
+from src.characters.combat import mod_attack, make_attack, dice_roll
+from src.objects.datatypes import WandName, MagicWand
+from src.characters.datatypes import Monster
+from src.characters.monsters import monsters, make_monster
 
 
 W_COLOUR = tcod.color.white
@@ -60,7 +60,17 @@ def teleport_away(level, target):
 
 
 def create_monster(level, target):
-    scroll_create_monster(level)
+    monster = make_monster(choice(monsters_for(level)))
+    monster.state = "TARGETING"
+    monster.location = level.player.location
+    for _ in range(5):
+        if monster.location == level.player.location:
+            x, y = movements[choice(list(movements))]
+            _move(monster, x, y, level)
+        else:
+            level.monsters.append(monster)
+            message("A {} appeared".format(monster.name))
+            return
 
 
 def cancellation(level, target):

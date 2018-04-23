@@ -7,10 +7,11 @@ from tcod import color as colour
 from src.config import movements
 from src.gui import message
 from src.maps import distance_to, place_in_room
-from src.objects.actions import get_id_action, get_from_inventory, decr
+from src.inputs import get_id_action
+# from src.characters.actions import get_from_inventory, decr
 from src.objects.datatypes import Scroll, ScrollName
-from src.objects.functions import _move
-from src.objects.monsters import monsters_for, make_monster
+from src.characters.functions import _move
+# from src.objects.monsters import monsters_for, make_monster
 
 S_COLOUR = colour.white
 
@@ -143,7 +144,7 @@ scrolls = [dict(name=Name('Mapping'), world=N, p=4, f=view_whole_map),
                 f=read_scare_monster),
            dict(name=Name("Teleportation"), world=M, p=5, f=teleport),
            dict(name=Name("Enchant Weapon"), world=M, p=8, f=enchant_weapon),
-           dict(name=Name("Create Monster"), world=M, p=4, f=create_monster),
+           # dict(name=Name("Create Monster"), world=M, p=4, f=create_monster),
            # dict(name=Name("Remove Curse"), world=M, p=7, f=remove_curse),
            dict(name=Name("Aggravate Monsters"), world=N, p=3,
                 f=aggravate_monsters),

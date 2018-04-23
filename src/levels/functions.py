@@ -3,10 +3,10 @@ from random import choice, randint, choices
 
 from src.levels.datatypes import Level
 from src.maps import place_in_room
+from src.characters import get_x_monsters_for
 from src.objects import (Stairs,
                          get_x_armours,
                          get_x_weapons,
-                         get_x_monsters_for,
                          get_x_scrolls_for,
                          get_x_potions,
                          get_x_traps_for,

@@ -5,20 +5,8 @@ from src.gui import update_screen, message, died_screen, win_screen
 from src.inputs import handle_keys
 from src.levels import make_level, update_level
 from src.maps import place_in_room
-from src.objects import make_player
-
-
-def play_level(level):
-    game_state = handle_keys(level)
-    update_level(level)
-    tcod.map_compute_fov(level.map_grid,
-                         level.player.location.x,
-                         level.player.location.y,
-                         radius=FOV_RADIUS - level.number//2,
-                         light_walls=FOV_LIGHT_WALLS,
-                         algo=FOV_ALGO)
-    update_screen(level)
-    return game_state
+from src.characters import make_player
+from src.run_logic import play_level
 
 
 def setup_level(world, level_number, player):

@@ -1,14 +1,7 @@
 from random import randint
 
-import tcod
-
 from src.gui import message
-from src.objects.datatypes import (Player,
-                                   Armour,
-                                   Weapon,
-                                   Projectile,
-                                   Scroll,
-                                   Monster)
+from src.characters.datatypes import Player, Monster
 
 
 def attack(x, y, level):

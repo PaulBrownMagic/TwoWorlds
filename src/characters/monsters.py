@@ -2,9 +2,9 @@ from random import randint, choice
 
 from tcod import color as colour
 
-from src.objects.datatypes import Monster
-from src.objects.combat import dice_roll
-from src.objects.magicmonsters import SL, SN, A, STATES, magic_monsters
+from src.characters.datatypes import Monster
+from src.characters.combat import dice_roll
+from src.characters.magicmonsters import SL, SN, A, STATES, magic_monsters
 from src.maps import distance_to
 
 M_COLOUR = colour.white

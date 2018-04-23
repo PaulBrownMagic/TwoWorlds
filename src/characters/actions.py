@@ -5,18 +5,19 @@ import tcod
 
 from src.config import (arrows, vim, movements,
                         HUNGRY, HUNGRY_DIE, HUNGRY_WEAK, HUNGRY_FEINT)
+from src.inputs import get_id_action, get_dir_action
 from src.maps import (same_location,
                       Location,
                       is_walkable,
                       is_blocked,
                       adjacent_tiles)
 
-from src.maps.datatypes import Tile
-from src.objects.combat import (dice_roll, does_attack_hit,
-                                thrown_damage_done_by, make_attack)
-from src.objects.datatypes import (Scroll, Armour, Weapon, Player,
-                                   Projectile, Potion, Monster,
-                                   MagicWand, Food, Fruit, InventoryItem)
+from src.characters.combat import (does_attack_hit, thrown_damage_done_by,
+                                   make_attack, attack)
+from src.objects.datatypes import (Scroll, Armour, Weapon,
+                                   Projectile, Potion,
+                                   MagicWand, Food, Fruit)
+from src.characters.datatypes import Player, Monster, InventoryItem
 from src.gui import (inventory_menu,
                      controls_menu,
                      message,
@@ -24,23 +25,6 @@ from src.gui import (inventory_menu,
                      hungry_popup,
                      )
 from src.objects.amulet import is_amulet
-from src.objects.combat import attack
-
-
-def get_id_action(level):
-    message("--- (* to view inventory)")
-    update_screen(level)
-    key = tcod.console_wait_for_keypress(flush=True)
-    while key.vk not in [66, 1]:
-        key = tcod.console_wait_for_keypress(flush=False)
-    if key.text == "*":
-        inventory_menu(level)
-        return get_id_action(level)
-    if key.text in level.player.inventory:
-        return key.text
-    else:
-        message("Unknown item")
-        return None
 
 
 def get_from_inventory(i, inventory):
@@ -48,6 +32,13 @@ def get_from_inventory(i, inventory):
     if itm is None:
         message("No such item")
     return itm
+
+
+def decr(itm, letter, inventory):
+    itm.count -= 1
+    if itm.count == 0:
+        inventory[letter] = None
+    return itm.item
 
 
 def takeoff_armour(level):
@@ -93,13 +84,6 @@ def wield_weapon(level):
         message("Rogue wields {}".format(itm.name))
     else:
         message("Can't wield {} as weapon".format(itm.name))
-
-
-def decr(itm, letter, inventory):
-    itm.count -= 1
-    if itm.count == 0:
-        inventory[letter] = None
-    return itm.item
 
 
 def drop_item(level):
@@ -152,28 +136,6 @@ def quaff_potion(level):
         return itm.function(level)
     else:
         message("Can't quaff {}".format(itm.item.name))
-
-
-def is_direction_key(key):
-    is_arrow_key = key.vk in list(arrows)
-    is_vim_key = key.vk == 66 and key.text in "hjklyubn"
-    return is_arrow_key or is_vim_key
-
-
-def get_dir_action(level):
-    message("direction?")
-    update_screen(level)
-    key = tcod.console_wait_for_keypress(flush=False)
-    while not is_direction_key(key):
-        if key.vk == 1:  # ESC
-            return None
-        key = tcod.console_wait_for_keypress(flush=False)
-    if key.vk in arrows:
-        return arrows[key.vk]
-    elif key.vk == 66 and key.text in "hjklyubn":
-        return vim[key.text]
-    else:
-        return None
 
 
 def find_target(direction, dist, level):
